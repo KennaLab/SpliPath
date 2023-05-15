@@ -9,7 +9,7 @@ SpliPath is developed to nominate novel pathogenic mutation hotspots in genomewi
 ### Install from github
 
 ```{sh}
-remotes::install_github("yanwang271/SpliPath")
+remotes::install_github("KennaLab/SpliPath")
 ```
 
 ### Clone repo
@@ -17,7 +17,7 @@ remotes::install_github("yanwang271/SpliPath")
 Clone repo
 
 ```{sh}
-git clone https://github.com/yanwang271/SpliPath.git
+git clone https://github.com/KennaLab/SpliPath.git
 ```
 Open an R session and install using devtools
 

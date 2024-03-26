@@ -27,9 +27,9 @@ devtools::install("SpliPath") # if the SpliPath folder is not in your current di
 
 ## Dependencies
 
-* [RVAT](https://github.com/kkenna/rvat)
+* [RVAT](https://github.com/KennaLab/rvat)
 * [bedtools](https://bedtools.readthedocs.io/en/latest/) (command-line tool)
 
 ## Tutorials
 
-Tutorials: https://github.com/KennaLab/SpliPath/blob/main/SpliPath_Tutorial.md
+* [SpliPath basics](https://github.com/KennaLab/SpliPath/blob/main/SpliPath_Tutorial.md)

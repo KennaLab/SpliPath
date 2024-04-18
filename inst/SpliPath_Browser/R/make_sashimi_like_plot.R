@@ -10,11 +10,11 @@ make_variant_plot = function(gdb_path, subject, gene.name, chr, start, end, wgs_
   chrom = paste0("chr", chr)
   
   ### Get variant Info
-  gdb=rvat::gdb(gdb_path)
+  mygdb=rvat::gdb(gdb_path)
   spliceaiTerm = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL")
   dbscSNVTerm =  c("ada_score", "rf_score")
   
-  vars <- RSQLite::dbGetQuery(gdb, 
+  vars <- RSQLite::dbGetQuery(mygdb, 
                               statement = sprintf("select VAR_id, var.POS, var.CHROM, var.REF, var.ALT,
                               SpliceAI.spliceaiSYMBOL, SpliceAI.%s, dbscSNV.ada_score, dbscSNV.rf_score
                               from var
@@ -30,13 +30,13 @@ make_variant_plot = function(gdb_path, subject, gene.name, chr, start, end, wgs_
 
   vars$SpliceAI = do.call(pmax, c(vars[, spliceaiTerm], na.rm=T))
   vars$dbscSNV = do.call(pmax, c(vars[, dbscSNVTerm], na.rm=T))
-  GT = rvat::getGT(gdb, VAR_id=vars$VAR_id, cohort="pheno")
+  GT = rvat::getGT(mygdb, VAR_id=vars$VAR_id, cohort="pheno")
   AF = data.frame(rvat::getAF(GT))
   colnames(AF) = "AF"
   vars$AF = AF[match(as.character(vars$VAR_id), rownames(AF)), "AF"]
   
   ### Get genotype of the query subject
-  SM=RSQLite::dbGetQuery(gdb,sprintf("select * from %s", "pheno"))
+  SM=RSQLite::dbGetQuery(mygdb,sprintf("select * from %s", "pheno"))
   wgs_id = wgs_id[wgs_id %in% SM$IID]
   
   geno_plot = list()
@@ -113,7 +113,6 @@ make_sashimi_like_plot <- function(
   x <- meta$group
   groups=sort(unique(x))
   
-  length_transform <- function(g){ g/100 }
   summary_func <- colSums
   
   max_log=.5*ceiling(2*log10( 1+max( unlist( foreach (tis=groups) %do% { intron_meta$counts=summary_func(y[ tis==x,,drop=F]) } ) ) ))
@@ -442,17 +441,16 @@ plot_splicing =  function(dir_path, gdb_path, rna_meta, wgs_meta, subject, gene.
   rownames(counts_gene) = paste(counts_gene$chr, counts_gene$start, counts_gene$end, counts_gene$strand, sep=":")
   counts_gene = counts_gene[rowSums(counts_gene[, as.character(meta$SampleID), drop=F]) != 0, ]
   chr = counts_gene$chr[1]
-  
-  psi_gene = read.table(sprintf("%s%s%s_%s_intron_psi.txt.gz", dir_path, .Platform$file.sep,  gene.id, gene.name), header=T, sep="\t", stringsAsFactors = F, check.names = F)
-  rownames(psi_gene) = paste(psi_gene$chr, psi_gene$start, psi_gene$end, psi_gene$strand, sep=":")
-  psi_gene = psi_gene[rowSums(psi_gene[, as.character(meta$SampleID), drop=F]) != 0, ]
-  
   counts_gene$verdict = "Annotated"
-  counts_gene$verdict[counts_gene$pos %in% rownames(psi_gene[psi_gene$is.anno == F, ])] = "Novel"
-  counts_gene[counts_gene$verdict == "Novel", "event"] = "annotated"
-  
+  counts_gene$verdict[counts_gene$event %in% c("novel_acceptor", "novel_donor", "exon_skipping")] = "Novel"
+
   intron_anno = counts_gene[, !colnames(counts_gene) %in% as.character(rna_meta$SampleID)]
   
+  # psi_gene = read.table(sprintf("%s%s%s_%s_intron_psi.txt.gz", dir_path, .Platform$file.sep,  gene.id, gene.name), header=T, sep="\t", stringsAsFactors = F, check.names = F)
+  # rownames(psi_gene) = paste(psi_gene$chr, psi_gene$start, psi_gene$end, psi_gene$strand, sep=":")
+  # psi_gene = psi_gene[rowSums(psi_gene[, as.character(meta$SampleID), drop=F]) != 0, ]
+  psi_gene = read.table(sprintf("%s%s%s_%s_leafcutter_pval.txt.gz", dir_path, .Platform$file.sep,  gene.id, gene.name), header=T, row.names = 1, sep="\t", stringsAsFactors = F, check.names = F)
+
   ### Pre define output
   intron_meta = data.frame()
   counts = data.frame()
@@ -469,8 +467,8 @@ plot_splicing =  function(dir_path, gdb_path, rna_meta, wgs_meta, subject, gene.
 
     counts = counts_gene[counts_gene$start >= plot_start & counts_gene$end <= plot_end, c("chr", "start", "end", "strand", as.character(rna_meta$SampleID))]
     intron_meta = cbind(counts_gene[rownames(counts), !colnames(counts_gene) %in% as.character(rna_meta$SampleID)], counts[, as.character(meta$SampleID)])
-    psi = psi_gene[psi_gene$start >= plot_start & psi_gene$end <= plot_end, ]
-    
+    # psi = psi_gene[psi_gene$start >= plot_start & psi_gene$end <= plot_end, ]
+    psi = psi_gene[rownames(intron_meta), ]
 
     if (nrow(intron_meta) != 0){
       ### Make RNA splice shashimi-like plots, and get the coordinates of actual plotting region
@@ -488,7 +486,7 @@ plot_splicing =  function(dir_path, gdb_path, rna_meta, wgs_meta, subject, gene.
     # Add junction match variant prediction info
     if (is.data.frame(srv_candidate_tbl)){
       if ("SpliceAI_pred_match_junction" %in% colnames(srv_candidate_tbl)){
-        srv_candidate_tbl$Coordinates_of_novel_junction = paste(srv_candidate_tbl$Coordinates_of_novel_junc, srv_candidate_tbl$Strand, sep=":")
+        srv_candidate_tbl$Coordinates_of_novel_junction = srv_candidate_tbl$Coordinates_of_novel_junc # paste(srv_candidate_tbl$Coordinates_of_novel_junc, srv_candidate_tbl$Strand, sep=":")
         variants_ls = unique(srv_candidate_tbl$DNA_variant)
         variants_ls_colnames = paste0("Match SpliceAI pred of ", variants_ls)
         for (v in variants_ls){
@@ -519,7 +517,7 @@ plot_splicing =  function(dir_path, gdb_path, rna_meta, wgs_meta, subject, gene.
   gene_wise_plots = list()
   gene_wise_plots[[1]] = gene_wise$plots
   gene_wise_plots = c(gene_wise_plots, gene_wise_var)
-
+  
   list(local_plots=sashimi_plots$plots, local_table=intron_meta, local_counts=counts, local_psi = psi, local_sashimi2gg = sashimi_plots$edges,
        gene_wise_plots = gene_wise_plots, gene_wise_sashimi2gg = gene_wise$edges)
 }

@@ -11,19 +11,22 @@ mergeJuncData <-
 function(sample_path_file, chrom, output_prefix = ""){
   
   readJuncFile = function(sample_id, file_name, chrom){
-    junc = read.table(file_name, header = F, sep = "\t", stringsAsFactors = F)
-    colnames(junc) = c('chr','start', 'end', 'x', sample_id, 'strand')
-    if (!chrom %in% junc$chr) warning (sprintf("Input chromosome name not in %s", file_name))
 
-    junc = junc[junc$chr == chrom,]
+    ### Read junctions in regtools BED format
+    junc = read.table(text = gsub(",", "\t", readLines(file_name)), header = F, sep = "\t", stringsAsFactors = F)
+    colnames(junc)[c(1,5,6)] = c("chr", sample_id, "strand")
+    junc$start = junc$V2 + junc$V13
+    junc$end = junc$V3 - junc$V14
+    
+    junc = junc[(junc$chr == chrom) & (junc$strand %in% c("+", "-")),]
     return(junc[,c('chr','start', 'end', 'strand', sample_id)])
   }
   
-  sample_list = read.table(sample_path_file, sep="\t", header=F, stringsAsFactors = F)
-  merged_junc = readJuncFile(sample_list[1, 1], sample_list[1, 2], chrom)
+  sample_list = read.table(sample_path_file, sep="\t", header=T, stringsAsFactors = F)
+  merged_junc = readJuncFile(sample_list[1, "SampleID"], sample_list[1, "Path"], chrom)
   if (nrow(sample_list) > 1){
     for (idx in 2:nrow(sample_list)){
-      sample_junc = readJuncFile(sample_list[idx, 1], sample_list[idx, 2], chrom)
+      sample_junc = readJuncFile(sample_list[idx, "SampleID"], sample_list[idx, "Path"], chrom)
       merged_junc = dplyr::full_join(merged_junc, sample_junc, by = c('chr','start', 'end', 'strand'))
     }
   }

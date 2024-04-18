@@ -1,113 +1,91 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 #  Splicing Pathology (SpliPath)
 
 ## Introduction
 
-SpliPath is developed to nominate novel pathogenic mutation hotspots in genomewide analyses of paried DNAseq and RNA splicing datasets. It serves to mitigate key challenges of distinguishing rare bona fide aberrant splicing events from abundant technical artefects, and to identify causal genetic factors responsible for these events. SpliPath provides genomewide splice junction annotation, mutation hotspots nomination and an interactive Shiny-based data visualization and analysis tool. It enables users to look beyond consensus splice sites for causal genetic variants in deeper intronic regions, and can be applied to analyse any dataset that includes matched DNA and RNA sequencing data for donors believed to harbour rare pathogenic splice-altering variants (sRV). 
+SpliPath is developed to nominate ultra-rare splicing quantitative trait loci (ur-sQTL) in genomewide analyses of paried DNAseq and RNA splicing datasets. It serves to mitigate key challenges of distinguishing rare bona fide aberrant splicing events from abundant artefects, and to identify causal genetic factors responsible for these events. SpliPath provides genomewide splice junction annotation, ur-sQTL nomination and an interactive Shiny-based data visualization and analysis tool. It enables users to look beyond consensus splice sites for causal genetic variants in deeper intronic regions, and can be applied to analyse any dataset that includes matched DNA and RNA sequencing data for donors believed to harbour rare pathogenic splice-altering variants. 
 
 ## Installation
 
-### Install from github
-
-```{sh}
-remotes::install_github("KennaLab/SpliPath")
-```
-
-### Clone repo
+### Clone repo (recommended)
 
 Clone repo
-
 ```{sh}
 git clone https://github.com/KennaLab/SpliPath.git
 ```
 Open an R session and install using devtools 
-
 ```{r}
-devtools::install("SpliPath") # if the SpliPath directory is not in your current directory,  provide the full path to the cloned repo
+devtools::install("SpliPath") 
+# if the SpliPath directory is not in your current directory,  provide the full path to the cloned repo
+```
+
+### Install dependencies
+
+* [RVAT](https://github.com/KennaLab/rvat)
+```{r}
+remotes::install_github("kennalab/rvat")
 ```
 
 ## Tutorial
 
-This tutorial shows how to nominate splice variants hotspots by paired DNA-RNAseq analyses. We start from preparing splicing junction data from aligned RNAseq BAM file and DNA variants data from VCF file. Next, we annotate novel splice junctions and putatively link them with predicted splice-altering variants. Then, we nominate splice variants hotspots by finding splice-altering variants that were linked to novel splicing junctions with moderate or strong evidence. Finally, we show how to use SpliPath data browser to view splicing evidence and facilitate linking rare splice-altering variants with consequent rare aberrant splicing events. Considering the size of human genome and transcriptome, we recommend to perform the data analyses (Step 1-7.1) using a high performance computing cluster, while data visualization (Step 7.2) can be performed on any standard laptop.
+This tutorial shows how to nominate ur-sQTL by integrating outlier splicing analysis (LeafCutterMD) with splice-altering variants predictions (SpliceAI and dbscSNV) of paired DNA-RNAseq samples. First, we annotate novel splice junctions. Then, we putatively link them with predicted splice-altering variants and nominate ultra rare ur-sQTL by finding splice-altering variants that were linked to novel splicing junctions with moderate or strong evidence. Finally, we show how to use SpliPath data browser to view splicing evidence and facilitate linking rare splice-altering variants with consequent rare aberrant splicing events. Considering the size of human genome and transcriptome, we recommend to perform the data analyses (Step 1-4.1) using a high performance computing cluster, while data visualization (Step 4.2) can be performed on any standard laptop.
 
-* The example input and output files can be found in ```SpliPath/Example_data/``` .
+* The example input and output files can be found in ```SpliPath/Example_data/``` (download by ```git clone https://github.com/KennaLab/SpliPath.git``` if the package was installed from github).
 
 ### Step 1. Data preperation
 
-SpliPath performs paired DNA-RNAseq analysis using splicing junction data in BED format and genomic variants in GDB format. 
+SpliPath performs paired DNA-RNAseq analysis using:
+* 1) A tab-delimited metadata table of the RNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', 'Group', 'Tissue' columns and a 'Path' column which specify the paths to the splicing junction BED files of each sample (e.g. ```SpliPath/Example_data/example_RNAseq_meta.txt``` )
+* 2) Splicing junction data in BED format (e.g. ```SpliPath/Example_data/regtools_junction/*``` )
+* 3) LeafCutter splicing outlier analysis output (e.g. ```SpliPath/Example_data/example_LeafCutter_outlier_pVals.txt``` )
 
-#### Step 1.1 Splicing junction data from RNAseq alignment
+* 4) A tab-delimited metadata table of the DNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', and 'Group' (e.g. ```SpliPath/Example_data/example_DNA_meta.txt``` )
+* 5) Genomic variants in VCF format (e.g.  ```SpliPath/Example_data/example_rvatData.vcf``` ). It should includes all samples in the metadata table.
+* 6) SpliceAI and dbscSNV prediction (e.g. ```SpliPath/Example_data/example_chr1_varAnno_SpliceAI.txt``` & ```SpliPath/Example_data/example_chr1_varAnno_dbscSNV.txt```. There are pre-computed SpliceAI scores (https://github.com/Illumina/SpliceAI), and pre-computed dbscSNV scores (http://www.liulab.science/dbscsnv.html) in VCF format.)
 
-We recommend [RegTools](https://regtools.readthedocs.io/en/latest/) to extract junction data from split-reads with minimum 6bp anchors in aligned RNAseq BAM files, using the command:
-```{sh}
-regtools junctions extract -a 6 -s 1 -o ${bamfile}.junc ${bamfile} 
-awk -F'[\t|,]' '$6 != "?" {print $1,$2+$13,$3-$14,$4,$5,$6}' OFS='\t' ${bamfile}.junc > ${bamfile}.bed
-```
-Option ```-s``` in ```regtools junctions extract``` means strand specificity of RNA library preparation, please change it according to the input RNAseq samples.
+See [Appendix](https://github.com/KennaLab/SpliPath/blob/main/SpliPath_Tutorial_Appendix.md) for the commands of running RegTools, LeafCutter and SpliceAI for generating the input files above.
 
-A tab-delimited metadata table of the RNAseq samples should be prepared for further use. It should have at least "SubjectID", "SampleID", "Group", and "Tissue" columns which specify the individuals the samples were collected, the phenotype group the individuals belong to, and the tissue source the sample were collected. 
 
-#### Step 1.2 Genomic variants in GDB format
-
-We use [RVAT](https://github.com/kkenna/rvat) to create GDB from VCF file. Please follow the [Setting up and populating a gdb](https://kkenna.github.io/rvat/articles/basics.html) steps in RVAT tutorial. 
-
-Here, we use the GDB in rvatData pacakge as an example. 
+##### Convert genomic variants VCF to GDB
+We use [RVAT](https://github.com/kkenna/rvat) to build GDB from VCF file.
 ```{r}
+library(SpliPath)
 library(rvat)
-library(rvatData)
-library(SummarizedExperiment)
 
-# Load the example GDB object.
-gdb_path = rvat_example("rvatData.gdb")
-gdb = gdb(gdb_path)
+vcfpath <- "example_rvatData.vcf"
+vcfpheno <- "example_DNA_meta.txt"
+gdbpath <- "example_rvatData.gdb"
+buildGdb(vcf = vcfpath,  output = gdbpath, overWrite = TRUE)
+
+# Upload sample information
+mygdb = gdb(gdbpath)
+cohort_pheno <- read.table(vcfpheno, header = TRUE, sep = "\t")
+cohort_pheno$IID = cohort_pheno$SampleID
+uploadCohort(object = mygdb, name = "pheno",value = cohort_pheno) # The 'name' parameter is the name of the cohort table in the GDB
 ```
 
-A tab-delimited metadata table of the DNA sequencing samples should be prepared for further use. It should have at least "SubjectID" and "SampleID" columns which specify the individuals the samples were collected. The SampleIDs in the metadata table should be in the "IID" field in the GDB cohort table. 
-
-#### Step 1.3 SplicAI and dbscSNV for splice-altering prediction
-
-There are pre-computed SpliceAI scores (https://github.com/Illumina/SpliceAI), and pre-computed dbscSNV scores (http://www.liulab.science/dbscsnv.html) in VCF format. Or, users can run SpliceAI with customized parameters.
-The output VCF files contain splice-altering predictions or any other annotations should be first transformed to a table, where the rows are the variants and columns are CHROM, POS, ID, REF, ALT, and any other annotations (For SpliceAI, the columns are "spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL", "spliceaiDP_AG", "spliceaiDP_AL", "spliceaiDP_DG", "spliceaiDP_DL", and etc. For dbscSNV, the columns are "ada_score", "rf_score", and etc.). 
-
-The table can be uploaded into GDB by 
+The variants annotation tables (SpliceAI & dbscSNV predictions) can be uploaded into GDB by 
 ```{r}
-spliceai_pred_path <- "example_chr1_varAnno_SpliceAI.txt" # example variant annotation file in ```SpliPath/Example_data/```
+spliceai_pred_path <- "example_chr1_varAnno_SpliceAI.txt"
 spliceai_pred <- read.table(spliceai_pred_path, header = TRUE, sep = "\t")
-uploadAnno(object = gdb, name = "SpliceAI",value = spliceai_pred) # The 'name' parameter is the name of the variants annotation table in the GDB
+uploadAnno(object = mygdb, name = "SpliceAI",value = spliceai_pred) # The 'name' parameter is the name of the variants annotation table in the GDB
 
 dbscsnv_pred_path <- "example_chr1_varAnno_dbscSNV.txt"
 dbscsnv_pred <- read.table(dbscsnv_pred_path, header = TRUE, sep = "\t")
-uploadAnno(object = gdb, name = "dbscSNV", value = dbscsnv_pred) 
+uploadAnno(object = mygdb, name = "dbscSNV", value = dbscsnv_pred) 
 ```
 Users can also upload other variants annotation to GDB and include them into analysis in Step 5.
 
-### Step 2. Merge splicing junction data to junction-sample data table
+##### (Optional) Customize reference files
+The default reference genomic annotations are from Ensembl GRCh38.98 GTF file and Snaptron annotation. Users can create customized reference file using ```prepareGenoRef``` function.
 
-After data preparation, start SpliPath analysis by merging splicing junctions per sample to a data frame. 
-Considering computational capacity, we highly recommend to perform Step 2-7 per chromosome. E.g. chromosome 1
-```{r}
-library(SpliPath)
-# 'sample_path_file' is a tab-delimited file which contain two columns: 1, unique RNAseq sample ids; 2, paths to the junction BED files (Step 1.1) of the corresponding sample.
-
-sample_path_file = "sample_path.txt"
-mergeJuncData(sample_path_file, chrom=1, output_prefix = "example")
-```
-The output junction-sample data table will be written in example_chr1.txt.gz file. The unique junctions are in rows and samples are in columns. The first four columns are the coordinates of junctions (chr, start, end, and strand). 
-
-### Step 3. Annotate splicing junctions
-
-The annotation include mapping the junctions to genes, finding novel splice sites, finding novel junctions and annotate splice events. Excluding possible gene fusion events and artefacts where the two splice sites of a junction are mapped two genes or neither of them are annotated. 
-```{r}
-annotateJunc(merged_junc = "example_chr1.txt.gz", output_prefix = "example_chr1", reference = "Default")
-```
-The output junction annotation will be written in example_chr1_anno.txt.gz file. 
-
-* The default reference genomic annotations are from Ensembl GRCh38.98 GTF file and Snaptron annotation. Users can create customized reference file using ```prepareGenoRef``` function.
-* The argument ```intron_bed``` of ```prepareGenoRef``` function is a BED file contain coordinates (chromosome, start position, end position, strand), transcript id, and gene id information of introns. This file can be generated by [GTFtools] (https://www.genemine.org/gtftools.php) from GTF file: python gtftools.py -i introns.bed ensembl.gtf  
-* After generating reference files, specify the directory to the generated reference files in ```reference``` argument in ```annotateJunc``` function and other functions in Step 4-7. 
+The argument ```intron_bed``` of ```prepareGenoRef``` function is a BED file contain coordinates (chromosome, start position, end position, strand), transcript id, and gene id information of introns. This file can be generated by [GTFtools] (https://www.genemine.org/gtftools.php) from GTF file, see [Appendix 4](https://github.com/KennaLab/SpliPath/blob/main/SpliPath_Tutorial_Appendix.md)
 
 ```{r}
-# gtf_file is an Ensembl genomic annotation GTF file
-
 prepareGenoRef(gtf_file = "ensembl.gtf", intron_bed = "introns.bed", output_dir = "new_reference")
 ```
 The output reference files will be written into the provided ```output_dir``` directory. The four output files are 
@@ -118,104 +96,92 @@ The output reference files will be written into the provided ```output_dir``` di
 
 Or, users can generate reference files following the file format of the default reference files in ```SpliPath/inst/extdata/Reference``` directory. And name them with "Gene.bed", "Exon_proteincoding.bed", "Intron_proteincoding.bed" and "Intron_noncoding.bed".
 
-### Step 4. Calculate PSI
+After generating reference files, specify the directory to the generated reference files in ```reference``` argument in functions of Step 2-4. 
 
-Next, the percentage spliced in (PSI) of the novel junctions are calculated.
+
+### Step 2. Annotate splicing junctions
+
+Considering computational capacity, we highly recommend performing Step 2-4 per chromosome.
+
+After data preparation, SpliPath starts with annotating the splicing junctions. The annotation include mapping the junctions to genes, finding novel splice sites, finding novel junctions and annotate splice events. Excluding possible gene fusion events and artefacts where the two splice sites of a junction are mapped two genes or neither of them are annotated. 
+
 ```{r}
-# 'junc_file' is the name of junction-sample file, the output of Step 2.
-# 'annotation' is the annotation source that included in defining whether the junction is "novel" or "annotated". Should be in the column names in "example_chr1_anno.txt.gz" file.
-
-novel_junc <- calJuncPSI(junc_file = "example_chr1.txt.gz", 
-                         junc_anno="example_chr1_anno.txt.gz", 
-                         output_prefix = "example_chr1", 
-                         annotation = c("in.ensembl", "in.snaptron"))
+annotateJunc(rna_meta = "example_RNAseq_meta.txt", chrom = 1, output_prefix = "example_chr1", reference = "Default")
 ```
-The PSI values of the novel junctions in each sample will be written in example_chr1_norm.txt.gz. The retured ```novel_junc``` object is a 7-column data.frame containing the information of the novel junctions: chr, start, end, strand, gene.id, gene.name, and event.
 
-### Step 5. Map potential splice-altering variants to novel junctions
+The function outputs two files: 
+1. example_chr1.txt.gz, which is junction read count table merged from all the samples. The unique junctions are in rows and samples are in columns; 
+2. example_chr1_anno.txt.gz, which is the annotation of the unique junctions. 
 
-First, find the annotated junctions and flanking exons that were disrupted by the novel junctions, where the cis-acting splice-altering variants most likely to lie in. 
+### Step 3. Map potential splice-altering variants to novel junctions and nominate ur-sQTL
+
+The ur-sQTL candidates is nominated by function ```mapVariantJunc```.
+
+The arguments are 
+1. Junction and variants inputs:
+* 'junc_anno_file' and 'read_count_file' are the files generated in Step 2.
+* 'tissues_leafcutter_pvals_file' lists paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under a tissue. The tissues should be the same with those in the RNAseq sample metadata file.
+* 'gdb_path' is the GDB file of DNA variants generated in Step 1. The table of phenotype data should be specified in 'chort_name'.
+* 'rna_meta' and 'wgs_meta' is the file of phenotype / metadata of the RNA and DNA sequencing samples. Both of them should have 'SubjectID', 'SampleID', and 'Group' to specify which individual the sample is collected and which phenotype group the individuals belong to. In addition, 'rna_meta' should have 'Tissue' column, which specify the tissue source of the RNAseq sample.
+* 'as_annotated' defines annotation sources (should be in colnames in junc_anno_file) that were combined to determine whether a junction is novel. 
+
+2. Thresholds to nominate ur-sQTL
+* max_LeafCutter_Pval is the maximum LeafCutter P value of a novel junction to nominate ultra rare sQTL candidate
+* min_nr_tissue requires LeafCutter P value of a junction should be under the threshold in at least this number of tissues
+* source_allele_freq is the source of the variants allele frequency. If set to "cohort", the allele frequency is calcuated from the cohort provided by the argument "cohort_name"
+* max_allele_freq is the aximum allele frequency to nominate ultra rare sQTL candidate 
+* splice_prediction is the splice-altering prediction to annotate the DNA variants. A splice prediction tool may provide more then one score. The   
+* min_splice_score is the min splice score of each prediction tools to nominate ur-sQTL candidate.
+* SpliceAI_default_reference suggests whether SpliceAI predictions are pre-computed or SpliceAI default annotation were used when running SpliceAI
+
 ```{r}
-var_region <- juncVariantRegion(novel_junc, output_prefix = "example_chr1", reference = "Default")
+var2junc = mapVariantJunc( junc_anno_file = "example_chr1_anno.txt.gz", 
+                           read_count_file = "example_chr1.txt.gz", 
+                           tissues_leafcutter_pvals_file = list(motor_cortex = "leafcutter/example_LeafCutter_motor_cortex_outlier_pVals.txt", 
+                                                                 frontal_cortex = "leafcutter/example_LeafCutter_frontal_cortex_outlier_pVals.txt", 
+                                                                 cervical = "leafcutter/example_LeafCutter_cervical_outlier_pVals.txt", 
+                                                                 lumbar = "leafcutter/example_LeafCutter_lumbar_outlier_pVals.txt"), 
+                           gdb_path = "example_rvatData.gdb", 
+                           cohort_name = "pheno", 
+                           rna_meta = "example_RNAseq_meta.txt", 
+                           wgs_meta = "example_DNA_meta.txt",
+                           reference = "Default",
+                           as_annotated = c("in.ensembl", "in.snaptron"),
+                           max_LeafCutter_Pval = 0.05,
+                           min_nr_tissue = 1,
+                           source_allele_freq = "cohort", 
+                           max_allele_freq = 0.05, 
+                           splice_prediction=list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL"), 
+                                                  dbscSNV = c("rf_score", "ada_score")), 
+                           min_splice_score = list(SpliceAI = 0.2, dbscSNV = 0.7),
+                           SpliceAI_default_reference = T,
+                           output_prefix = "example_chr1")
+                                  
 ```
-The output will be written in ./example_chr1_variant_region.txt.gz. This file is the input of the following mapping potential splice-altering variants to novel junctions step:
-```{r}
-# 'count_file' is the file of junction-sample read count generated by Step 2.
-# 'psi_file' is the file of novel junction PSIs generated by Step 3.
-# 'gdb_path' is the GDB file of DNA variants generated by Step 1. The table of phenotype data should be specified in 'chort_name'.
-# 'rna_meta' and 'wgs_meta' is the file of phenotype / metadata of the RNA and DNA sequencing samples. Both of them should have 'SubjectID', 'SampleID', and 'Group' to specify which individual the sample is collected and which phenotype group the individuals belong to. In addition, 'rna_meta' should have 'Tissue' column, which specify the tissue source of the RNAseq sample.
-# 'tissue' specifies RNAseq of which tissue source will be included into analysis.
-# 'splice_prediction' is the splice-altering prediction to annotate the DNA variants. Default: list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL"), dbscSNV = c("rf_score", "ada_score")). The names of elements in the list are prediction tools, they should be in GDB database tables. The items are the scoring fields in the GDB database prediction tables. The maximum of the given scores will be used as the prediction of the corresponding tool for each variants. E.g. The SpliceAI score of a variant will be the maximum of spliceaiDS_AG, "pliceaiDS_AL, spliceaiDS_DG, and spliceaiDS_DL. 
+The output data.frame is also written in example_chr1_crossref.txt.gz. One row in the the data.frame is an annotated DNA variant that mapped to a novel junction in a subject's tissues. The LeafCutter P values and read count in tissues are in columns "LeafCutter_pVal_tissue" and "Read_tissue". "SpliceAI_pred_match_junction" column show whether the SpliceAI predicted splicing consequences of a variant match a novel junction; "SpliceAI_pred_cryptic_exon" column show whether SpliceAI predict a cryptic exon. "sQTL_candidate" column suggest whether the variant and novel junction is a sQTL candidate, based on the provided thresholds.
 
-tissue_var2junc <- mapVariantJunc(junc_var_region = var_region, 
-                                  psi_file = "example_chr1_norm.txt.gz", 
-                                  count_file = "example_chr1.txt.gz", 
-                                  gdb_path = rvat_example("rvatData.gdb"), 
-                                  cohort_name = "pheno", 
-                                  rna_meta = "example_RNAseq_meta.txt", 
-                                  wgs_meta = "example_DNA_meta.txt", 
-                                  tissues = c("tissue1", "tissue2", "tissue3", "tissue4"), 
-                                  allele_freq = "gdb",
-                                  splice_prediction=list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL"),
-                                                         dbscSNV = c("rf_score", "ada_score")), 
-                                  output_prefix = "example_chr1")
-```
-The returned ```tissue_var2junc``` is a data.frame. One row in the the data.frame is an annotated DNA variant that mapped to a novel junction in a subject's tissues. The junction PSI and read count in tissues are in columns "PSI_tissue" and "Read_tissue". The data.frame is also written into example_chr1_crossref.txt.gz
+### Step 4. Run SpliPath data browser
 
-* (Optional) The following function compares whether the SpliceAI predicted splice site gain or loss match the observed novel junctions.
-```{r}
-spliceai_match <- matchPredNObs(gdb_path = rvat_example("rvatData.gdb"), 
-                                tissue_var2junc, 
-                                min_spliceai_score = 0.2, 
-                                reference = "Default")
-```
-In the returned ```spliceai_match```, one row in the the data.frame is an annotated DNA variant that mapped to a novel junction in a subject's tissues. "match_by_threshold" column show whether the SpliceAI predicted splicing consequences of a variant match a novel junction; "pred_cryptic_exon" column show whether SpliceAI predict a cryptic exon.  
-
-### Step 6. Nominate mutation hotspots
-
-Users can nominate mutation hotspots by setting thresholds for junction splicing signal, variants splice-altering scores, allele frequency.
-```{r}
-# 'min_psi' is the minimum PSI required for observed novel junction.
-# 'min_read' is the minimum number of reads required to support the observed novel junction. 
-# 'min_read_include' means also include junctions supported by more than min_read_include reads even of their PSI are under min_psi.
-# 'tissues' specifies the tissues included in the analysis.
-# 'min_nr_tissue' means user require novel junction observation concordant across min_nr_tissue tissues.
-# 'min_splice_pred' is a list of the minimum prediction score of prediciton tools. Default: list(SpliceAI = 0.2, dbscSNV = 0.7).
-# 'splicai_pred_match' Optional. If the matching of SpliceAI prediction and observed novel junctions are provided (see Step 5), the "match_by_threshold" and "pred_cryptic_exon" column will be add into the output. 
-# 'blacklist' Optional. A genomic region blacklist. If provided, the regions will be removed.
-
-nominateHotspot(tissue_var2junc, 
-                min_psi = 0.2, 
-                min_read = 5, 
-                min_read_include = 20, 
-                tissues = c("tissue1", "tissue2", "tissue3", "tissue4"), 
-                min_nr_tissue = 2, 
-                min_splice_pred = list(SpliceAI = 0.2, dbscSNV = 0.7), 
-                max_allele_freq = 0.05,
-                splicai_pred_match = spliceai_match, 
-                output_prefix = "example_chr1")
-```
-The paired DNA variants and novel junctions will be written in example_chr1_hotspot.txt.gz. In this file, column "Hotspot" shows whether they are nominated as mutation hotspots based on provided thresholds.
-
-### Step 7. Run SpliPath data browser
-
-#### Step 7.1 Input data of data browser
+#### Step 4.1 Input data of data browser
 
 To prepare data for visualization, first, separate the junction files in per gene and put them into a directory (e.g. browser_junction) by:
 ```{r}
 browserData(junc_count = c("example_chr1.txt.gz"), 
-            junc_psi = c("example_chr1_norm.txt.gz"), 
             junc_anno = c("example_chr1_anno.txt.gz"), 
-            hotspot = c("example_chr1_hotspot.txt.gz"), 
+            var2junc = c("example_chr1_crossref.txt.gz"), 
+            tissues_leafcutter_pvals_file = list(motor_cortex = "leafcutter/example_LeafCutter_motor_cortex_outlier_pVals.txt", 
+                                                 frontal_cortex = "leafcutter/example_LeafCutter_frontal_cortex_outlier_pVals.txt", 
+                                                 cervical = "leafcutter/example_LeafCutter_cervical_outlier_pVals.txt", 
+                                                 lumbar = "leafcutter/example_LeafCutter_lumbar_outlier_pVals.txt"),
             output_dir = "browser_junction")
 ```
-* If Step 2-6 were performed per chromosome, input files of ```junc_count```, ```junc_psi```, ```junc_anno```, ```hotspot```, should be vectors of matched file names for all the chromosomes. 
+* If Step 2 and 3 were performed per chromosome, input files of ```junc_count```, ```junc_psi```, ```junc_anno```, ```hotspot```, should be vectors of matched file names for all the chromosomes. 
 
 In the output directory, there will be four types of files:
 1) "number_of_novel_junction_per_subject.txt" records the total number of novel junctions per RNAseq sample,
 2) "geneID_geneName_intron_count.txt.gz" are junction-sample read count table per gene,
-3) "geneID_geneName_intron_psi.txt.gz" are junction-sample PSI table per gene,
-4) "geneID_geneName_intron_sRV_candidate.txt.gz" are the candidate mutation hotspots per gene.  
+3) "geneID_geneName_leafcutter_pval.txt.gz" are junction-sample LeafCutter P values table per gene,
+4) "geneID_geneName_crossref.txt.gz" are the mapped ur-sQTL candidates per gene.  
 
 The other files necessary for SpliPath browser are (the input or output files in Step 2-6):
 1) RNAseq sample meta data file (e.g. example_RNAseq_meta.txt)
@@ -224,21 +190,22 @@ The other files necessary for SpliPath browser are (the input or output files in
 4) Gene reference file (e.g. Gene_GRCh38.98.bed)
 5) Exon reference file (e.g. Exon_GRCh38.98.proteincoding.bed)
 
-#### Step 7.2 Launch data browser
+#### Step 4.2 Launch data browser
 
-After the files mentioned above are prepared, user can run SpliPath data browser by:
+If user preformed the data analysis in a remote computer cluster and prefer to launch data browser on a local computer, user can download the files mentioned in Step 4.1 to local and then run ```runDataBroswer``` function:
 ```{r}
 # 'data_dir' should be the same with 'output_dir' argument in browserData function.
 
+library(SpliPath)
+library(ggVennDiagram)
 runDataBroswer(rna_meta = "example_RNAseq_meta.txt", 
-              dna_meta = "example_DNA_meta.txt", 
-              gdb_path = rvat_example("rvatData.gdb"),
-              data_dir = "browser_junction",
-              reference = "Default")
+               dna_meta = "example_DNA_meta.txt", 
+               gdb_path = "example_rvatData.gdb",
+               data_dir = "browser_junction",
+               reference = "Default")
 ```
-If user preformed the data analysis in a remote computer cluster and prefer to launch data browser on a local computer, user can download the files mentioned in Step 7.1 to local and then run ```runDataBroswer``` function.
 
 The following graphic tutorial show how to use SpliPath to anwser splicing pathology questions:
-![](https://github.com/yanwang271/SpliPath/blob/main/SpliPath_Browser/www/Guide.png)
+![](https://github.com/KennaLab/SpliPath/blob/main/inst/SpliPath_Browser/www/Guide.png)
 
 

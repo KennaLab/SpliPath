@@ -15,7 +15,7 @@ function(novel_junc, output_prefix, reference = "Default"){
   if (reference == "Default"){
     ref_exon = system.file(paste("extdata", "Reference", "Exon_GRCh38.98.proteincoding.bed", sep=.Platform$file.sep), package = "SpliPath")
   }else{
-    ref_exon = sprintf("%s%sExon_proteincoding.bed", .Platform$file.sep, reference)
+    ref_exon = paste(reference, "Exon_proteincoding.bed", sep=.Platform$file.sep)
   }
   
   exon = read.table(ref_exon, sep="\t", header = FALSE, stringsAsFactors = F) 
@@ -28,9 +28,9 @@ function(novel_junc, output_prefix, reference = "Default"){
   var_region = data.frame(do.call(rbind, var_region))
   colnames(var_region)[9:10] = c("region.start", "region.end")
   
-  output_file = gzfile(sprintf("%s_variant_region.txt.gz", output_prefix), "w")
-  write.table(var_region, output_file, sep="\t", quote=F, row.names = F)
-  close(output_file)
+  # output_file = gzfile(sprintf("%s_variant_region.txt.gz", output_prefix), "w")
+  # write.table(var_region, output_file, sep="\t", quote=F, row.names = F)
+  # close(output_file)
   
   var_region
 }

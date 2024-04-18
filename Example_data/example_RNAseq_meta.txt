@@ -1,101 +1,101 @@
-SampleID	SubjectID	Group	Tissue	RIN
-RNA1	ALS1	ALS	tissue4	6.1
-RNA2	ALS1374	ALS	tissue4	6.7
-RNA3	CTRL15039	Control	tissue1	7.6
-RNA4	ALS3	ALS	tissue1	6.2
-RNA5	ALS3	ALS	tissue3	5
-RNA6	ALS3	ALS	tissue4	8.8
-RNA7	ALS4	ALS	tissue1	7.6
-RNA8	ALS4	ALS	tissue1	4.5
-RNA9	ALS4	ALS	tissue3	8.7
-RNA10	ALS4	ALS	tissue4	8.5
-RNA11	ALS3	ALS	tissue2	7.4
-RNA12	ALS5	ALS	tissue1	6.8
-RNA13	ALS5	ALS	tissue1	9.1
-RNA14	ALS5	ALS	tissue3	6.7
-RNA15	ALS5	ALS	tissue4	6.2
-RNA16	ALS1	ALS	tissue1	6.8
-RNA17	ALS6	ALS	tissue1	7.6
-RNA18	ALS6	ALS	tissue3	6.1
-RNA19	ALS6	ALS	tissue4	7.3
-RNA20	ALS6	ALS	tissue2	8.7
-RNA21	ALS1	ALS	tissue3	3.5
-RNA22	ALS7	ALS	tissue1	5.7
-RNA23	ALS7	ALS	tissue3	7.4
-RNA24	ALS7	ALS	tissue4	7.9
-RNA25	ALS7	ALS	tissue2	5.5
-RNA26	CTRL15039	Control	tissue4	5.6
-RNA27	ALS8	ALS	tissue1	6.1
-RNA28	ALS8	ALS	tissue3	6.6
-RNA29	ALS8	ALS	tissue2	5.9
-RNA30	ALS9	ALS	tissue1	3.5
-RNA31	ALS9	ALS	tissue1	9.2
-RNA32	ALS9	ALS	tissue3	8.5
-RNA33	ALS9	ALS	tissue4	7
-RNA34	ALS10	ALS	tissue1	9
-RNA35	ALS10	ALS	tissue1	6.3
-RNA36	ALS10	ALS	tissue3	5.7
-RNA37	ALS10	ALS	tissue4	4.2
-RNA38	ALS11	ALS	tissue3	7.8
-RNA39	ALS12	ALS	tissue1	5.9
-RNA40	ALS12	ALS	tissue1	5.5
-RNA41	ALS12	ALS	tissue3	7.2
-RNA42	ALS13	ALS	tissue1	6.9
-RNA43	ALS13	ALS	tissue3	6.7
-RNA44	ALS14	ALS	tissue1	5.4
-RNA45	ALS15	ALS	tissue2	6.1
-RNA46	ALS59	ALS	tissue2	6.5
-RNA47	CTRL13168	Control	tissue3	7.6
-RNA48	ALS299	ALS	tissue2	7.9
-RNA49	ALS311	ALS	tissue2	5.6
-RNA50	ALS2	ALS	tissue2	6.8
-RNA51	ALS8	ALS	tissue4	8.6
-RNA52	ALS11	ALS	tissue1	5.8
-RNA53	ALS12	ALS	tissue4	7.6
-RNA54	ALS13	ALS	tissue4	6.9
-RNA55	CTRL13160	Control	tissue1	5.3
-RNA56	CTRL13160	Control	tissue4	8.9
-RNA57	CTRL13160	Control	tissue3	6.1
-RNA58	ALS14	ALS	tissue4	6.6
-RNA59	ALS14	ALS	tissue3	4.8
-RNA60	ALS15	ALS	tissue1	7.9
-RNA61	ALS15	ALS	tissue4	6.8
-RNA62	ALS15	ALS	tissue3	7.5
-RNA63	ALS1374	ALS	tissue3	8
-RNA64	ALS59	ALS	tissue1	5.6
-RNA65	ALS59	ALS	tissue4	3.7
-RNA66	ALS59	ALS	tissue3	7.3
-RNA67	CTRL13163	Control	tissue2	6.6
-RNA68	CTRL13163	Control	tissue1	7.2
-RNA69	ALS1374	ALS	tissue2	7
-RNA70	CTRL13163	Control	tissue3	5.4
-RNA71	CTRL16568	Control	tissue4	9
-RNA72	ALS156	ALS	tissue2	8.5
-RNA73	ALS156	ALS	tissue1	6.9
-RNA74	ALS156	ALS	tissue3	7.1
-RNA75	ALS156	ALS	tissue4	4.3
-RNA76	ALS1374	ALS	tissue1	8.8
-RNA77	ALS299	ALS	tissue1	9.3
-RNA78	ALS299	ALS	tissue3	6.1
-RNA79	ALS299	ALS	tissue4	8.1
-RNA80	ALS311	ALS	tissue1	7.1
-RNA81	ALS311	ALS	tissue3	8.5
-RNA82	ALS311	ALS	tissue4	6.1
-RNA83	CTRL15039	Control	tissue1	7.4
-RNA84	CTRL13164	Control	tissue1	7.9
-RNA85	CTRL13164	Control	tissue3	3.8
-RNA86	CTRL13164	Control	tissue2	8
-RNA87	CTRL13165	Control	tissue1	6.3
-RNA88	CTRL13165	Control	tissue3	6.3
-RNA89	CTRL13165	Control	tissue2	4.8
-RNA90	ALS2	ALS	tissue1	6.1
-RNA91	ALS2	ALS	tissue3	6.4
-RNA92	CTRL13166	Control	tissue1	5.3
-RNA93	CTRL13166	Control	tissue2	5.5
-RNA94	CTRL13167	Control	tissue2	4.5
-RNA95	CTRL13168	Control	tissue2	7.7
-RNA96	CTRL16568	Control	tissue2	7.2
-RNA97	CTRL15039	Control	tissue2	7.9
-RNA98	CTRL13161	Control	tissue2	4.6
-RNA99	CTRL13162	Control	tissue1	7.2
-RNA100	CTRL13164	Control	tissue4	5.7
+SampleID	SubjectID	Group	Tissue	RIN	Path
+RNA1	ALS1	ALS	lumbar	6.1	SpliPath/Example_data/regtools_junction/RNA1.Aligned.sorted.junc
+RNA2	ALS1374	ALS	lumbar	6.7	SpliPath/Example_data/regtools_junction/RNA2.Aligned.sorted.junc
+RNA3	CTRL15039	Control	motor_cortex	7.6	SpliPath/Example_data/regtools_junction/RNA3.Aligned.sorted.junc
+RNA4	ALS3	ALS	motor_cortex	6.2	SpliPath/Example_data/regtools_junction/RNA4.Aligned.sorted.junc
+RNA5	ALS3	ALS	cervical	5	SpliPath/Example_data/regtools_junction/RNA5.Aligned.sorted.junc
+RNA6	ALS3	ALS	lumbar	8.8	SpliPath/Example_data/regtools_junction/RNA6.Aligned.sorted.junc
+RNA7	ALS4	ALS	motor_cortex	7.6	SpliPath/Example_data/regtools_junction/RNA7.Aligned.sorted.junc
+RNA8	ALS4	ALS	motor_cortex	4.5	SpliPath/Example_data/regtools_junction/RNA8.Aligned.sorted.junc
+RNA9	ALS4	ALS	cervical	8.7	SpliPath/Example_data/regtools_junction/RNA9.Aligned.sorted.junc
+RNA10	ALS4	ALS	lumbar	8.5	SpliPath/Example_data/regtools_junction/RNA10.Aligned.sorted.junc
+RNA11	ALS3	ALS	frontal_cortex	7.4	SpliPath/Example_data/regtools_junction/RNA11.Aligned.sorted.junc
+RNA12	ALS5	ALS	motor_cortex	6.8	SpliPath/Example_data/regtools_junction/RNA12.Aligned.sorted.junc
+RNA13	ALS5	ALS	motor_cortex	9.1	SpliPath/Example_data/regtools_junction/RNA13.Aligned.sorted.junc
+RNA14	ALS5	ALS	cervical	6.7	SpliPath/Example_data/regtools_junction/RNA14.Aligned.sorted.junc
+RNA15	ALS5	ALS	lumbar	6.2	SpliPath/Example_data/regtools_junction/RNA15.Aligned.sorted.junc
+RNA16	ALS1	ALS	motor_cortex	6.8	SpliPath/Example_data/regtools_junction/RNA16.Aligned.sorted.junc
+RNA17	ALS6	ALS	motor_cortex	7.6	SpliPath/Example_data/regtools_junction/RNA17.Aligned.sorted.junc
+RNA18	ALS6	ALS	cervical	6.1	SpliPath/Example_data/regtools_junction/RNA18.Aligned.sorted.junc
+RNA19	ALS6	ALS	lumbar	7.3	SpliPath/Example_data/regtools_junction/RNA19.Aligned.sorted.junc
+RNA20	ALS6	ALS	frontal_cortex	8.7	SpliPath/Example_data/regtools_junction/RNA20.Aligned.sorted.junc
+RNA21	ALS1	ALS	cervical	3.5	SpliPath/Example_data/regtools_junction/RNA21.Aligned.sorted.junc
+RNA22	ALS7	ALS	motor_cortex	5.7	SpliPath/Example_data/regtools_junction/RNA22.Aligned.sorted.junc
+RNA23	ALS7	ALS	cervical	7.4	SpliPath/Example_data/regtools_junction/RNA23.Aligned.sorted.junc
+RNA24	ALS7	ALS	lumbar	7.9	SpliPath/Example_data/regtools_junction/RNA24.Aligned.sorted.junc
+RNA25	ALS7	ALS	frontal_cortex	5.5	SpliPath/Example_data/regtools_junction/RNA25.Aligned.sorted.junc
+RNA26	CTRL15039	Control	lumbar	5.6	SpliPath/Example_data/regtools_junction/RNA26.Aligned.sorted.junc
+RNA27	ALS8	ALS	motor_cortex	6.1	SpliPath/Example_data/regtools_junction/RNA27.Aligned.sorted.junc
+RNA28	ALS8	ALS	cervical	6.6	SpliPath/Example_data/regtools_junction/RNA28.Aligned.sorted.junc
+RNA29	ALS8	ALS	frontal_cortex	5.9	SpliPath/Example_data/regtools_junction/RNA29.Aligned.sorted.junc
+RNA30	ALS9	ALS	motor_cortex	3.5	SpliPath/Example_data/regtools_junction/RNA30.Aligned.sorted.junc
+RNA31	ALS9	ALS	motor_cortex	9.2	SpliPath/Example_data/regtools_junction/RNA31.Aligned.sorted.junc
+RNA32	ALS9	ALS	cervical	8.5	SpliPath/Example_data/regtools_junction/RNA32.Aligned.sorted.junc
+RNA33	ALS9	ALS	lumbar	7	SpliPath/Example_data/regtools_junction/RNA33.Aligned.sorted.junc
+RNA34	ALS10	ALS	motor_cortex	9	SpliPath/Example_data/regtools_junction/RNA34.Aligned.sorted.junc
+RNA35	ALS10	ALS	motor_cortex	6.3	SpliPath/Example_data/regtools_junction/RNA35.Aligned.sorted.junc
+RNA36	ALS10	ALS	cervical	5.7	SpliPath/Example_data/regtools_junction/RNA36.Aligned.sorted.junc
+RNA37	ALS10	ALS	lumbar	4.2	SpliPath/Example_data/regtools_junction/RNA37.Aligned.sorted.junc
+RNA38	ALS11	ALS	cervical	7.8	SpliPath/Example_data/regtools_junction/RNA38.Aligned.sorted.junc
+RNA39	ALS12	ALS	motor_cortex	5.9	SpliPath/Example_data/regtools_junction/RNA39.Aligned.sorted.junc
+RNA40	ALS12	ALS	motor_cortex	5.5	SpliPath/Example_data/regtools_junction/RNA40.Aligned.sorted.junc
+RNA41	ALS12	ALS	cervical	7.2	SpliPath/Example_data/regtools_junction/RNA41.Aligned.sorted.junc
+RNA42	ALS13	ALS	motor_cortex	6.9	SpliPath/Example_data/regtools_junction/RNA42.Aligned.sorted.junc
+RNA43	ALS13	ALS	cervical	6.7	SpliPath/Example_data/regtools_junction/RNA43.Aligned.sorted.junc
+RNA44	ALS14	ALS	motor_cortex	5.4	SpliPath/Example_data/regtools_junction/RNA44.Aligned.sorted.junc
+RNA45	ALS15	ALS	frontal_cortex	6.1	SpliPath/Example_data/regtools_junction/RNA45.Aligned.sorted.junc
+RNA46	ALS59	ALS	frontal_cortex	6.5	SpliPath/Example_data/regtools_junction/RNA46.Aligned.sorted.junc
+RNA47	CTRL13168	Control	cervical	7.6	SpliPath/Example_data/regtools_junction/RNA47.Aligned.sorted.junc
+RNA48	ALS299	ALS	frontal_cortex	7.9	SpliPath/Example_data/regtools_junction/RNA48.Aligned.sorted.junc
+RNA49	ALS311	ALS	frontal_cortex	5.6	SpliPath/Example_data/regtools_junction/RNA49.Aligned.sorted.junc
+RNA50	ALS2	ALS	frontal_cortex	6.8	SpliPath/Example_data/regtools_junction/RNA50.Aligned.sorted.junc
+RNA51	ALS8	ALS	lumbar	8.6	SpliPath/Example_data/regtools_junction/RNA51.Aligned.sorted.junc
+RNA52	ALS11	ALS	motor_cortex	5.8	SpliPath/Example_data/regtools_junction/RNA52.Aligned.sorted.junc
+RNA53	ALS12	ALS	lumbar	7.6	SpliPath/Example_data/regtools_junction/RNA53.Aligned.sorted.junc
+RNA54	ALS13	ALS	lumbar	6.9	SpliPath/Example_data/regtools_junction/RNA54.Aligned.sorted.junc
+RNA55	CTRL13160	Control	motor_cortex	5.3	SpliPath/Example_data/regtools_junction/RNA55.Aligned.sorted.junc
+RNA56	CTRL13160	Control	lumbar	8.9	SpliPath/Example_data/regtools_junction/RNA56.Aligned.sorted.junc
+RNA57	CTRL13160	Control	cervical	6.1	SpliPath/Example_data/regtools_junction/RNA57.Aligned.sorted.junc
+RNA58	ALS14	ALS	lumbar	6.6	SpliPath/Example_data/regtools_junction/RNA58.Aligned.sorted.junc
+RNA59	ALS14	ALS	cervical	4.8	SpliPath/Example_data/regtools_junction/RNA59.Aligned.sorted.junc
+RNA60	ALS15	ALS	motor_cortex	7.9	SpliPath/Example_data/regtools_junction/RNA60.Aligned.sorted.junc
+RNA61	ALS15	ALS	lumbar	6.8	SpliPath/Example_data/regtools_junction/RNA61.Aligned.sorted.junc
+RNA62	ALS15	ALS	cervical	7.5	SpliPath/Example_data/regtools_junction/RNA62.Aligned.sorted.junc
+RNA63	ALS1374	ALS	cervical	8	SpliPath/Example_data/regtools_junction/RNA63.Aligned.sorted.junc
+RNA64	ALS59	ALS	motor_cortex	5.6	SpliPath/Example_data/regtools_junction/RNA64.Aligned.sorted.junc
+RNA65	ALS59	ALS	lumbar	3.7	SpliPath/Example_data/regtools_junction/RNA65.Aligned.sorted.junc
+RNA66	ALS59	ALS	cervical	7.3	SpliPath/Example_data/regtools_junction/RNA66.Aligned.sorted.junc
+RNA67	CTRL13163	Control	frontal_cortex	6.6	SpliPath/Example_data/regtools_junction/RNA67.Aligned.sorted.junc
+RNA68	CTRL13163	Control	motor_cortex	7.2	SpliPath/Example_data/regtools_junction/RNA68.Aligned.sorted.junc
+RNA69	ALS1374	ALS	frontal_cortex	7	SpliPath/Example_data/regtools_junction/RNA69.Aligned.sorted.junc
+RNA70	CTRL13163	Control	cervical	5.4	SpliPath/Example_data/regtools_junction/RNA70.Aligned.sorted.junc
+RNA71	CTRL16568	Control	lumbar	9	SpliPath/Example_data/regtools_junction/RNA71.Aligned.sorted.junc
+RNA72	ALS156	ALS	frontal_cortex	8.5	SpliPath/Example_data/regtools_junction/RNA72.Aligned.sorted.junc
+RNA73	ALS156	ALS	motor_cortex	6.9	SpliPath/Example_data/regtools_junction/RNA73.Aligned.sorted.junc
+RNA74	ALS156	ALS	cervical	7.1	SpliPath/Example_data/regtools_junction/RNA74.Aligned.sorted.junc
+RNA75	ALS156	ALS	lumbar	4.3	SpliPath/Example_data/regtools_junction/RNA75.Aligned.sorted.junc
+RNA76	ALS1374	ALS	motor_cortex	8.8	SpliPath/Example_data/regtools_junction/RNA76.Aligned.sorted.junc
+RNA77	ALS299	ALS	motor_cortex	9.3	SpliPath/Example_data/regtools_junction/RNA77.Aligned.sorted.junc
+RNA78	ALS299	ALS	cervical	6.1	SpliPath/Example_data/regtools_junction/RNA78.Aligned.sorted.junc
+RNA79	ALS299	ALS	lumbar	8.1	SpliPath/Example_data/regtools_junction/RNA79.Aligned.sorted.junc
+RNA80	ALS311	ALS	motor_cortex	7.1	SpliPath/Example_data/regtools_junction/RNA80.Aligned.sorted.junc
+RNA81	ALS311	ALS	cervical	8.5	SpliPath/Example_data/regtools_junction/RNA81.Aligned.sorted.junc
+RNA82	ALS311	ALS	lumbar	6.1	SpliPath/Example_data/regtools_junction/RNA82.Aligned.sorted.junc
+RNA83	CTRL15039	Control	motor_cortex	7.4	SpliPath/Example_data/regtools_junction/RNA83.Aligned.sorted.junc
+RNA84	CTRL13164	Control	motor_cortex	7.9	SpliPath/Example_data/regtools_junction/RNA84.Aligned.sorted.junc
+RNA85	CTRL13164	Control	cervical	3.8	SpliPath/Example_data/regtools_junction/RNA85.Aligned.sorted.junc
+RNA86	CTRL13164	Control	frontal_cortex	8	SpliPath/Example_data/regtools_junction/RNA86.Aligned.sorted.junc
+RNA87	CTRL13165	Control	motor_cortex	6.3	SpliPath/Example_data/regtools_junction/RNA87.Aligned.sorted.junc
+RNA88	CTRL13165	Control	cervical	6.3	SpliPath/Example_data/regtools_junction/RNA88.Aligned.sorted.junc
+RNA89	CTRL13165	Control	frontal_cortex	4.8	SpliPath/Example_data/regtools_junction/RNA89.Aligned.sorted.junc
+RNA90	ALS2	ALS	motor_cortex	6.1	SpliPath/Example_data/regtools_junction/RNA90.Aligned.sorted.junc
+RNA91	ALS2	ALS	cervical	6.4	SpliPath/Example_data/regtools_junction/RNA91.Aligned.sorted.junc
+RNA92	CTRL13166	Control	motor_cortex	5.3	SpliPath/Example_data/regtools_junction/RNA92.Aligned.sorted.junc
+RNA93	CTRL13166	Control	frontal_cortex	5.5	SpliPath/Example_data/regtools_junction/RNA93.Aligned.sorted.junc
+RNA94	CTRL13167	Control	frontal_cortex	4.5	SpliPath/Example_data/regtools_junction/RNA94.Aligned.sorted.junc
+RNA95	CTRL13168	Control	frontal_cortex	7.7	SpliPath/Example_data/regtools_junction/RNA95.Aligned.sorted.junc
+RNA96	CTRL16568	Control	frontal_cortex	7.2	SpliPath/Example_data/regtools_junction/RNA96.Aligned.sorted.junc
+RNA97	CTRL15039	Control	frontal_cortex	7.9	SpliPath/Example_data/regtools_junction/RNA97.Aligned.sorted.junc
+RNA98	CTRL13161	Control	frontal_cortex	4.6	SpliPath/Example_data/regtools_junction/RNA98.Aligned.sorted.junc
+RNA99	CTRL13162	Control	motor_cortex	7.2	SpliPath/Example_data/regtools_junction/RNA99.Aligned.sorted.junc
+RNA100	CTRL13164	Control	lumbar	5.7	SpliPath/Example_data/regtools_junction/RNA100.Aligned.sorted.junc

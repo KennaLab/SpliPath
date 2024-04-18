@@ -1,54 +1,95 @@
 
+# draw_dbscSNV_v1 = function(data, tissue, min_read, min_psi, min_score){
+#   psi_col = paste0("PSI_", tissue)
+#   rc_col = paste0("Read_", tissue)
+#   colnames(data)[colnames(data) == psi_col] = "PSI"
+#   colnames(data)[colnames(data) == rc_col] = "Read"
+#   
+#   data = data[!is.na(data$dbscSNV) & (!is.na(data$PSI)),]
+#   if (nrow(data) == 0){
+#     empty_ggplot_with_info(info = sprintf("No splicing evidence in\n %s,\n Try other tissues", tissue))
+#   }else{
+#     ggplot(data, aes(x=PSI, y=dbscSNV)) + 
+#       geom_point(aes(colour = Read >= min_read, shape = AF < 0.05), size = 2) + 
+#       scale_colour_manual(name = sprintf('Read count >= %s', min_read), values=setNames(c('#0066CC','#CCCCCC'),c(T, F))) +
+#       scale_shape_manual(name = 'Annotated AF < 0.05', values=setNames(c(16, 17), c(F, T))) +
+#       geom_rect(aes(xmin = min_psi-0.01, xmax = 1.01, ymin = min_score-0.01, ymax = 1.01), fill = "transparent", color = "red") +
+#       xlim(0,1.01) + ylim(0, 1.01) +
+#       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+#   }
+# }
+
 draw_dbscSNV = function(data, tissue, min_read, min_psi, min_score){
-  psi_col = paste0("PSI_", tissue)
+  lcp_col = paste0("LeafCutter_pVal_", tissue)
   rc_col = paste0("Read_", tissue)
-  colnames(data)[colnames(data) == psi_col] = "PSI"
+  colnames(data)[colnames(data) == lcp_col] = "LeafCutter_Pval"
   colnames(data)[colnames(data) == rc_col] = "Read"
   
-  data = data[!is.na(data$dbscSNV) & (!is.na(data$PSI)),]
+  data = data[!is.na(data$dbscSNV) & (!is.na(data$LeafCutter_Pval)),]
   if (nrow(data) == 0){
     empty_ggplot_with_info(info = sprintf("No splicing evidence in\n %s,\n Try other tissues", tissue))
   }else{
-    ggplot(data, aes(x=PSI, y=dbscSNV)) + 
+    ggplot(data, aes(x=-log10(LeafCutter_Pval), y=dbscSNV)) + 
       geom_point(aes(colour = Read >= min_read, shape = AF < 0.05), size = 2) + 
       scale_colour_manual(name = sprintf('Read count >= %s', min_read), values=setNames(c('#0066CC','#CCCCCC'),c(T, F))) +
-      scale_shape_manual(name = 'Annotated AF < 0.05', values=setNames(c(16, 17), c(F, T))) +
-      geom_rect(aes(xmin = min_psi-0.01, xmax = 1.01, ymin = min_score-0.01, ymax = 1.01), fill = "transparent", color = "red") +
-      xlim(0,1.01) + ylim(0, 1.01) +
+      scale_shape_manual(name = 'Allele Freq < 0.05', values=setNames(c(16, 17), c(F, T))) +
+      geom_rect(aes(xmin = -log10(0.05), xmax = Inf, ymin = min_score-0.01, ymax = 1.01), fill = "transparent",  color = "red") +
+      ylim(0, 1.01) + expand_limits(x=0) +
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
   }
 }
 
-draw_Spliceai = function(data, tissue, min_read, min_psi, min_score){
-  psi_col = paste0("PSI_", tissue)
-  rc_col = paste0("Read_", tissue)
-  colnames(data)[colnames(data) == psi_col] = "PSI"
-  colnames(data)[colnames(data) == rc_col] = "Read"
 
-  data = data[!is.na(data$SpliceAI) & (!is.na(data$PSI)),]
+# draw_Spliceai_v1 = function(data, tissue, min_read, min_psi, min_score){
+#   psi_col = paste0("PSI_", tissue)
+#   rc_col = paste0("Read_", tissue)
+#   colnames(data)[colnames(data) == psi_col] = "PSI"
+#   colnames(data)[colnames(data) == rc_col] = "Read"
+# 
+#   data = data[!is.na(data$SpliceAI) & (!is.na(data$PSI)),]
+#   if (nrow(data) == 0){
+#     empty_ggplot_with_info(info = sprintf("No splicing evidence in\n %s,\n Try other tissues", tissue))
+#   }else{
+#     ggplot(data, aes(x=PSI, y=SpliceAI)) + 
+#       geom_point(aes(colour = Read >= min_read, shape = AF < 0.05), size = 2) + 
+#       scale_colour_manual(name = sprintf('Read count >= %s', min_read), values = setNames(c('#0066CC','#CCCCCC'),c(T, F))) +
+#       scale_shape_manual(name = 'Annotated AF < 0.05', values=setNames(c(16, 17), c(F, T))) +
+#       geom_rect(aes(xmin = min_psi-0.01, xmax = 1.01, ymin = min_score-0.01, ymax = 1.01), fill = "transparent",  color = "red") +
+#       xlim(0,1.01) + ylim(0, 1.01) +
+#       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+#   }
+# }
+
+draw_Spliceai = function(data, tissue, min_read, min_psi, min_score){
+  lcp_col = paste0("LeafCutter_pVal_", tissue)
+  rc_col = paste0("Read_", tissue)
+  colnames(data)[colnames(data) == lcp_col] = "LeafCutter_Pval"
+  colnames(data)[colnames(data) == rc_col] = "Read"
+  
+  data = data[!is.na(data$SpliceAI) & (!is.na(data$LeafCutter_Pval)),]
   if (nrow(data) == 0){
     empty_ggplot_with_info(info = sprintf("No splicing evidence in\n %s,\n Try other tissues", tissue))
   }else{
-    ggplot(data, aes(x=PSI, y=SpliceAI)) + 
+    ggplot(data, aes(x=-log10(LeafCutter_Pval), y=SpliceAI)) + 
       geom_point(aes(colour = Read >= min_read, shape = AF < 0.05), size = 2) + 
       scale_colour_manual(name = sprintf('Read count >= %s', min_read), values = setNames(c('#0066CC','#CCCCCC'),c(T, F))) +
-      scale_shape_manual(name = 'Annotated AF < 0.05', values=setNames(c(16, 17), c(F, T))) +
-      geom_rect(aes(xmin = min_psi-0.01, xmax = 1.01, ymin = min_score-0.01, ymax = 1.01), fill = "transparent",  color = "red") +
-      xlim(0,1.01) + ylim(0, 1.01) +
+      scale_shape_manual(name = 'Allele Freq < 0.05', values=setNames(c(16, 17), c(F, T))) +
+      geom_rect(aes(xmin = -log10(0.05), xmax = Inf, ymin = min_score-0.01, ymax = 1.01), fill = "transparent",  color = "red") +
+      ylim(0, 1.01) + expand_limits(x=0) +
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
   }
 }
 
 
 draw_gene_red_box = function(gene_name, gene_table, dir_path, tissue, rna_meta, min_read, min_psi, min_spliceai, min_dbscsnv){
-  red_box_file = sprintf("%s%s%s_%s_sRV_candidate.txt.gz", dir_path, .Platform$file.sep, name2id(gene_table, gene_name)[1], gene_name)
+  red_box_file = sprintf("%s%s%s_%s_crossref.txt.gz", dir_path, .Platform$file.sep, name2id(gene_table, gene_name)[1], gene_name)
 
   if (length(red_box_file) > 0){
     sqtl_candidate = read.table(red_box_file, header=T, sep="\t", stringsAsFactors = F)
     gene_red_box = list(SpliceAI = draw_Spliceai(sqtl_candidate, tissue, min_read, min_psi, min_spliceai), dbscSNV = draw_dbscSNV(sqtl_candidate, tissue, min_read, min_psi, min_dbscsnv)) 
   }else{
     sqtl_candidate = data.frame()
-    gene_red_box = list(SpliceAI = empty_ggplot_with_info(sprintf("No sRV candidates")), dbscSNV = empty_ggplot_with_info(sprintf("No sRV candidates")))
+    gene_red_box = list(SpliceAI = empty_ggplot_with_info(sprintf("No ur-sQTL candidates")), dbscSNV = empty_ggplot_with_info(sprintf("No sRV candidates")))
   }
   
   intron_sample = count_cryptic_intron_gene(tissue, rna_meta, sqtl_candidate, gene.id = name2id(gene_table, gene_name)[1], min_psi, min_read)
@@ -57,12 +98,15 @@ draw_gene_red_box = function(gene_name, gene_table, dir_path, tissue, rna_meta, 
 }
 
 select_sqtl_candidate = function(sqtl_candidate, tissue, predictor, bursh_psi_min, bursh_psi_max, bursh_score_min, bursh_score_max){
-  psi_colname = paste0("PSI_", tissue)
+  # psi_colname = paste0("PSI_", tissue)
+  # sqtl_candidate[is.na(sqtl_candidate)] = 0
+  # sqtl_candidate = sqtl_candidate[sqtl_candidate[[psi_colname]] >= bursh_psi_min & sqtl_candidate[[psi_colname]] <= bursh_psi_max & sqtl_candidate[[predictor]] >= bursh_score_min & sqtl_candidate[[predictor]] <= bursh_score_max, ]
+  # sqtl_candidate = separate(sqtl_candidate, col="Coordinates_of_novel_junc", sep=":-|:\\+", into = c("Coordinates_of_novel_junc", NA))
+  
+  psi_colname = paste0("LeafCutter_pVal_", tissue)
   sqtl_candidate[is.na(sqtl_candidate)] = 0
-  sqtl_candidate = sqtl_candidate[sqtl_candidate[[psi_colname]] >= bursh_psi_min & sqtl_candidate[[psi_colname]] <= bursh_psi_max & sqtl_candidate[[predictor]] >= bursh_score_min & sqtl_candidate[[predictor]] <= bursh_score_max, ]
-  #                                c("SubjectID", "Junc", "Strand", "Event", "DNA_variant", "Spliceai", "SpliceAI_pred_match_junction", "dbscSNV", "AF", "Gene", "Gene_id", "Expand_region", "SpliceAI_pred_cryptic_exon")]
-  #colnames(sqtl_candidate) = c("Patient", "Coordinates_of_novel_junction", "Strand", "Event", "DNA_variant", "SpliceAI", "SpliceAI_pred_match_junction", "dbscSNV", "AF", "gene_name", "gene_id", "Expand_region", "SpliceAI_pred_cryptic_exon")
-  sqtl_candidate = separate(sqtl_candidate, col="Coordinates_of_novel_junc", sep=":-|:\\+", into = c("Coordinates_of_novel_junc", NA))
+  sqtl_candidate = sqtl_candidate[-log10(sqtl_candidate[[psi_colname]]) >= bursh_psi_min & -log10(sqtl_candidate[[psi_colname]]) <= bursh_psi_max & sqtl_candidate[[predictor]] >= bursh_score_min & sqtl_candidate[[predictor]] <= bursh_score_max, ]
+
   sqtl_candidate
 }
 

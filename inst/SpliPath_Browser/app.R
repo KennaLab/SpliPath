@@ -58,8 +58,8 @@ ui = fluidPage(
           p("*If SubjectIDs are not provided, all the individuals in the meta data will be included."),
           radioButtons(inputId = "junction_type_gene", 
                        label = "Novel junctions in genes", 
-                       choices = c("Novel junctions overlap sRV", "All novel junctions"), 
-                       selected = "Novel junctions overlap sRV"),
+                       choices = c("ur-sQTL novel junctions", "All novel junctions"), 
+                       selected = "ur-sQTL novel junctions"),
           
           selectInput(inputId = "prediction_tool", 
                       label = "Variants annotation methods", 
@@ -69,10 +69,11 @@ ui = fluidPage(
                        value = 0.2,
                        min = 0, max = 1, step=0.1),
 
-          numericInput(inputId = "psi_thres", 
-                       label = "Min junction PSI",
-                       value = 0.2,
-                       min = 0, max = 1, step=0.1),
+          # numericInput(inputId = "psi_thres", 
+          #              label = "Min junction PSI",
+          #              value = 0.2,
+          #              min = 0, max = 1, step=0.1),
+          
           numericInput(inputId = "rc_thres", 
                        label = "Min junction read count",
                        value = 5,
@@ -96,11 +97,11 @@ ui = fluidPage(
     
     ### 3nd Penal: red box
     tabPanel(
-      title = "Select sRV",
+      title = "Select sQTL",
       sidebarLayout(
         sidebarPanel(
           selectInput(inputId = "sqtl_gene", 
-                    label = "Search sRV candidates in gene:",
+                    label = "Search ur-sQTL candidates in gene:",
                     choices = upload_file$view_gene_list),
           
           uiOutput("update_red_box_tissues"),
@@ -111,8 +112,8 @@ ui = fluidPage(
            label = "Search")
         ),
         mainPanel(
-          titlePanel("sRV candidates"),
-          p('Drag cursor to select sRV candidates in the plots.'),
+          titlePanel("ur-sQTL candidates"),
+          p('Drag cursor to select ur-sQTL candidates in the plots.'),
           splitLayout(
             plotOutput(outputId = "gene_SpliceAI", brush = "gene_spliceai_brush"),
             plotOutput(outputId = "gene_dbscSNV", brush = "gene_dbscsnv_brush")
@@ -129,11 +130,11 @@ ui = fluidPage(
     
     ### 4rd Penal: Sashimi Plot
     tabPanel(
-      title = "sRV - Sashimi Plot",
+      title = "sQTL - Sashimi Plot",
       value = "sashimiPage",
       verticalLayout(
         fluidRow(
-          column(8, offset = 2, align="left", titlePanel("sRV splicing"))
+          column(8, offset = 2, align="left", titlePanel("sQTL splicing"))
         ),
         fluidRow(
           column(8, offset = 2, align="left", p('\nDouble click the junction in the first splicing plot to visualize junction expression in subject groups. \n'))
@@ -163,7 +164,7 @@ ui = fluidPage(
     
     ### 5th Penal: Statistics
     tabPanel(
-      title = "sRV - Expression Plot",
+      title = "sQTL - Expression Plot",
       value = "expPage",
       fluidRow(
         column(8, offset = 2, align="left", titlePanel("Expression of the selected junction among groups")),
@@ -277,7 +278,7 @@ server = function(input, output, session) {
                       gene_SpliceAI = ggplot(),
                       gene_dbscSNV = ggplot(),
                       min_read = 5,
-                      min_psi = 0.2,
+                      # min_psi = 0.2,
                       sqtl_candidate_tbl = data.frame(),
                       intron_sample_tbl = data.frame(),
                       gene_wise_splice = ggplot(),
@@ -328,23 +329,23 @@ server = function(input, output, session) {
 
   observeEvent(input$search_gene, {
     rv$min_read = input$rc_thres
-    rv$min_psi = input$psi_thres
+    # rv$min_psi = input$psi_thres
     
     rv$input_overview_genes = c()
-    if (input$overview_genes != ""){
-      rv$input_overview_genes = c(rv$input_overview_genes, unlist(strsplit(input$overview_genes, split="\n")))
+    if (! "" %in% input$overview_genes){
+      rv$input_overview_genes = c(rv$input_overview_genes, setdiff(unlist(strsplit(input$overview_genes, split="\n")), ""))
     }
     if (!is.null(input$overview_geneset)){
       rv$input_overview_genes = c(rv$input_overview_genes, readLines(input$overview_geneset$datapath))
     }
 
     rv$input_overview_subjects = input$overview_subject
-    if (input$overview_subject != ""){
-      rv$input_overview_subjects = unlist(strsplit(input$overview_subject, split="\n"))
+    if (! "" %in% input$overview_subject ){
+      rv$input_overview_subjects = setdiff(unlist(strsplit(input$overview_subject, split="\n")), "")
     }
     
-    gene_overview = gene_tissue_nr_junc_venn(rv$input_overview_genes, upload_file$tissues, rv$input_overview_subjects, dir_path = upload_file$browser_data_dir, gene_table = upload_file$gene_table, rna_meta = upload_file$rna_meta, "Group", 
-                                             input$psi_thres, input$rc_thres, input$nr_tissues, input$junction_type_gene, input$prediction_tool, input$splice_score_thres)
+    gene_overview = gene_tissue_nr_junc_venn(toupper(rv$input_overview_genes), upload_file$tissues, rv$input_overview_subjects, dir_path = upload_file$browser_data_dir, gene_table = upload_file$gene_table, rna_meta = upload_file$rna_meta, "Group", 
+                                             "input$psi_thres", input$rc_thres, input$nr_tissues, input$junction_type_gene, input$prediction_tool, input$splice_score_thres)
     rv$sample_junc_plot = gene_overview$sample_junc_plot
     rv$gene_tissue_tbl = gene_overview$gene_tissue_tbl
     rv$gene_tissue_venn_plot = gene_overview$gene_tissue_venn_plot  
@@ -372,7 +373,7 @@ server = function(input, output, session) {
 
   # Select gene and tissue, show red box
   observeEvent(input$plot_red_box, { 
-    red_box = draw_gene_red_box(toupper(input$sqtl_gene), upload_file$gene_table, upload_file$browser_data_dir, input$sqtl_tissue, upload_file$rna_meta, rv$min_read, rv$min_psi, min_spliceai = 0.2, min_dbscsnv = 0.7) 
+    red_box = draw_gene_red_box(toupper(input$sqtl_gene), upload_file$gene_table, upload_file$browser_data_dir, input$sqtl_tissue, upload_file$rna_meta, rv$min_read, "rv$min_psi", min_spliceai = 0.2, min_dbscsnv = 0.7) 
     rv$gene_SpliceAI = red_box$plots$SpliceAI
     rv$gene_dbscSNV = red_box$plots$dbscSNV
     rv$sqtl_candidate_tbl = red_box$sqtl_candidate
@@ -437,7 +438,7 @@ server = function(input, output, session) {
     rv$intron_sample_tbl
   }, server=T, selection = "single", rownames= FALSE, options = list(pageLength = 10, scrollX=TRUE))
   
-  # Click intron per sample table, plot only gene splice
+  # Click intron per sample table, plot only gene splice 
   observeEvent(input$intron_sample_tbl_rows_selected,{
     row_select = as.numeric(input$intron_sample_tbl_rows_selected)
 
@@ -549,7 +550,6 @@ server = function(input, output, session) {
 
 }
 
-#shiny::runApp(shinyApp(ui = ui, server = server), display.mode="showcase")
-
+# shiny::runApp(shinyApp(ui = ui, server = server), display.mode="showcase")
 shinyApp(ui = ui, server = server)
 

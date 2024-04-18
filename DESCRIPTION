@@ -1,14 +1,14 @@
 Package: SpliPath
 Type: Package
 Title: Splicing Pathology
-Version: 0.1
+Version: 0.1.1
 Date: 2023-02-09
 Author: c(person(given='Yan',family='Wang',email='Y.Wang-3@umcutrecht.nl',role = c("aut", "cre")), person(given='Kevin',family='Kenna',email='K.P.Kenna@umcutrecht.nl',role = c("aut")))
-Description: SpliPath was developed to nominate novel pathogenic mutation hotspots in genomewide by paried DNA sequencing and RNA splicing data analysis. SpliPath provide genomewide splice junction annotation, mutation hotspots nomination, and Shiny-based interactive data visualization, which can be applied to analyse any dataset that includes matched whole genome sequencing and RNAseq data for a common set of donors expected to harbour pathogenic splice-altering rare variants (sRV).
+Description: SpliPath is developed to nominate ultra-rare splicing quantitative trait loci (ur-sQTL) in genomewide analyses of paried DNAseq and RNA splicing datasets. It serves to mitigate key challenges of distinguishing rare bona fide aberrant splicing events from abundant artefects, and to identify causal genetic factors responsible for these events. SpliPath provides genomewide splice junction annotation, ur-sQTL nomination and an interactive Shiny-based data visualization and analysis tool. It enables users to look beyond consensus splice sites for causal genetic variants in deeper intronic regions, and can be applied to analyse any dataset that includes matched DNA and RNA sequencing data for donors believed to harbour rare pathogenic splice-altering variants. 
 Encoding: UTF-8
 License: What license is it under?
 Remotes:
 biocViews:
-Imports: tidyr, dplyr, bedr, rtracklayer, rvat, RSQLite, DBI, shiny, ggplot2, stringr, foreach, ggVennDiagram
+Imports: tidyr, dplyr, rtracklayer, rvat, RSQLite, DBI, shiny, ggplot2, stringr, foreach
 Depends: R (>= 3.6.1)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.1

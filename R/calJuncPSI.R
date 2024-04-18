@@ -7,6 +7,7 @@
 #'
 #' @return data.frame Seven-column dataframe. Contain coordinates, mapped gene, and splicing event of each novel junction.
 #' @export
+
 calJuncPSI <-
 function(junc_file, junc_anno, output_prefix, annotation = c("in.ensembl", "in.snaptron")){
   if (is.character(junc_file)){

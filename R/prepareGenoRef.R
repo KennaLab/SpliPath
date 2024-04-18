@@ -22,7 +22,6 @@ function(gtf_file, intron_bed, output_dir){
   
   proteinCodingTranscript = unique(ref.gtf[(ref.gtf$gene_biotype == 'protein_coding') & (ref.gtf$transcript_biotype == 'protein_coding') & !is.na(ref.gtf$transcript_id), 'transcript_id'])
   intron_ref = read.table(intron_bed, sep='\t', header=F, stringsAsFactors = F)
-  intron_ref = intron_ref[order(intron_ref$seqnames, intron_ref$start), ]
   write.table(intron_ref[intron_ref[, 4] %in% proteinCodingTranscript, ], 
               paste(output_dir, 'Intron_proteincoding.bed', sep = .Platform$file.sep), sep='\t', row.names = FALSE, col.names=FALSE, quote=FALSE)
 

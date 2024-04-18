@@ -5,7 +5,8 @@
 \title{Annotate junctions extracted from RNAseq data}
 \usage{
 annotateJunc(
-  merged_junc,
+  rna_meta,
+  chrom,
   output_prefix,
   reference = "Default",
   addition_annotation = list(snaptron = system.file(paste("extdata", "Reference",
@@ -13,7 +14,9 @@ annotateJunc(
 )
 }
 \arguments{
-\item{merged_junc}{data.frame or string The returned data.frame or output file of mergeJuncData function. The coordinates of unique junctions will be used in this function.}
+\item{rna_meta}{string RNAseq sample metadata file. The file should contain at least "SampleID", "SubjectID", "Group", "Tissue", and "Path" columns}
+
+\item{chrom}{string The junctions in this chromosome will be merged among samples.}
 
 \item{output_prefix}{string Prefix of output file. The annotations of the junctions will be written in a prefix_anno.txt.gz file.}
 

@@ -29,9 +29,7 @@ browserData<-
       colnames(rename_row) = c("chr", "start", "end", "strand")
       rename_row[, "end"] = as.integer(rename_row[, "end"]) - 1
       rownames(leafcutter_pvals) = apply(rename_row, 1, paste, collapse=":")
-      
-      print(head(leafcutter_pvals))
-      
+
       if (is.null(leafcutter_pvals_merged)){
         leafcutter_pvals_merged = leafcutter_pvals
       }else{

@@ -32,7 +32,7 @@ function(sample_path_file, chrom, output_prefix = ""){
   }
   merged_junc[is.na(merged_junc)] = 0
   merged_junc = merged_junc[order(as.numeric(merged_junc$start), as.numeric(merged_junc$end)), ]
-  junc_table_gz = gzfile(sprintf("%s_chr%s.txt.gz", output_prefix, chrom), "w")
+  junc_table_gz = gzfile(sprintf("%s.txt.gz", output_prefix, chrom), "w")
   write.table(format(merged_junc, scientific=FALSE), junc_table_gz, row.names = F, col.names = T, sep = "\t", quote = F)
   close(junc_table_gz)
   

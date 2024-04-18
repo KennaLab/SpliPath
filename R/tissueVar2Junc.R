@@ -9,8 +9,8 @@ function(rna_meta, tissue, var2junc, psi, read_count, leafcutter_pvals, geno, va
   rna_meta = rna_meta[rna_meta$Tissue == tissue, ]
   rna_meta = rna_meta[!duplicated(rna_meta$SubjectID), ]
   rna_meta = rna_meta[rna_meta$SubjectID %in% colnames(geno), ]
-  
-  var2junc$junc_coord = do.call(rbind, strsplit(var2junc$junc, split=":EN"))[,1]
+
+  var2junc$junc_coord = do.call(rbind, strsplit(var2junc$junc, split="\\:EN"))[,1]
   # Remove junctions that are not in the leafcutter test results
   var2junc = var2junc[var2junc$junc_coord %in% rownames(leafcutter_pvals),  ]  
   

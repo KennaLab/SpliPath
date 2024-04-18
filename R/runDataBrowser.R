@@ -26,6 +26,8 @@ function(rna_meta, dna_meta, gdb_path, data_dir, reference = "Default"){
     upload_file$exon_table$gene.name <<- upload_file$gene_table[match(upload_file$exon_table$gene.id, upload_file$gene_table$gene.id), "gene.name"]
     
     upload_file$rna_meta <<- read.table(rna_meta, header=T, sep="\t")
+    upload_file$rna_meta <<- upload_file$rna_meta[, !colnames(upload_file$rna_meta) %in% c("Path")]
+    
     upload_file$tissues <<- levels(as.factor(upload_file$rna_meta$Tissue))
     
     upload_file$wgs_meta <<- read.table(dna_meta, header=T, sep="\t")

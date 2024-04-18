@@ -4,7 +4,16 @@
 \alias{tissueVar2Junc}
 \title{Map potential splice-altering DNA variants to novel junctions in one tissue}
 \usage{
-tissueVar2Junc(rna_meta, tissue, var2junc, psi, read_count, geno, var_pred)
+tissueVar2Junc(
+  rna_meta,
+  tissue,
+  var2junc,
+  psi,
+  read_count,
+  leafcutter_pvals,
+  geno,
+  var_pred
+)
 }
 \value{
 data.frame One row in the the dataframe is an annotated DNA variant that mapped to a novel junction in a subject's tissues. The junction PSI and read count in the are in columns "PSI_tissue" and "Read_tissue".

@@ -26,7 +26,7 @@ function(novel_junc, output_prefix, reference = "Default"){
   
   var_region = lapply(novel_junc$junc, FUN = juncVariantRegion_, novel_junc=novel_junc, exon=exon)
   var_region = data.frame(do.call(rbind, var_region))
-  colnames(var_region)[9:10] = c("region.start", "region.end")
+  colnames(var_region)[24:25] = c("region.start", "region.end")
   
   # output_file = gzfile(sprintf("%s_variant_region.txt.gz", output_prefix), "w")
   # write.table(var_region, output_file, sep="\t", quote=F, row.names = F)

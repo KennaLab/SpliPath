@@ -52,5 +52,5 @@ spliceai \
 #### 4. Get annotated introns from genome annotation file.
 The GTFtools can be downloaded in https://www.genemine.org/gtftools.php
 ```{sh}
-python gtftools.py -i introns.bed ensembl.gtf  
+python gtftools.py -i Intron_GRCh38.98.bed Homo_sapiens.GRCh38.98.gtf  
 ```

@@ -6,9 +6,9 @@
 \usage{
 browserData(
   junc_count,
-  junc_psi,
   junc_anno,
-  hotspot,
+  tissues_leafcutter_pvals_file,
+  var2junc,
   min_read = 5,
   output_dir = "."
 )
@@ -16,11 +16,11 @@ browserData(
 \arguments{
 \item{junc_count}{vector A list of output files of mergeJuncData funciton, which contain junction-sample read count table. The input file name list in the first four arguments should be matched.}
 
-\item{junc_psi}{vector A list of output files of calJuncPSI function, which contain junction-sample PSI table.}
-
 \item{junc_anno}{vector A list of output files of annotateJunc function, which contain junction annotations.}
 
-\item{hotspot}{vector A list of output files of nominateHotspot function.}
+\item{tissues_leafcutter_pvals_file}{list The file paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under the tissue type. The tissues should be the same with those in the RNAseq sample metadata file.}
+
+\item{var2junc}{string or data.frame The output file or data.frame of mapVariantJunc function. One row in the the dataframe is an annotated DNA variant that mapped to a novel junction in a subject's tissues.}
 
 \item{output_dir}{string The path to data output directory.}
 }

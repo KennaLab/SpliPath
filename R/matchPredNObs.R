@@ -11,8 +11,10 @@
 #' @return data.frame Column "match_by_threshold" shows whether the prediction of variants matched the corresponding novel junction. "NA" in the column means either the prediction score is under given threshold, or the prediction is a gain of annotated site or a loss of novel site which is out the scope of this function. 
 #' The "SG", "SL", "EG", and "EL" in the column names means "start gain", "start loss", "end gain", and "end loss".
 #' @import RSQLite
-#' @import DBI
-#' @exports
+#' @import SummarizedExperiment
+#' @import rvat
+#' @import dplyr
+#' @export
 #'
 matchPredNObs <-
 function(gdb_path, cohort_name, var2junc, min_SpliceAI_score, max_skip_exon = 2, reference = "Default", SpliceAI_default_reference = FALSE){
@@ -154,7 +156,7 @@ function(gdb_path, cohort_name, var2junc, min_SpliceAI_score, max_skip_exon = 2,
 
   ### Judge match or not by number of matched and mis-matched sites
   matched[, score_sites][ which(matched[, score_sites] == FALSE, arr.ind = T) ] = NA
-  matched$matched_site = rowSums((matched[, score_sites] * matched[, match_sites]) > 0, na.rm = T)
+  matched$matched_site = rowSums(matched[, score_sites] * matched[, match_sites], na.rm = T)
   matched$miss_matched_site = rowSums((matched[, score_sites] * matched[, match_sites]) == 0, na.rm = T)
   matched$match_by_threshold[matched$matched_site > 0 & matched$miss_matched_site == 0 ] = "full_match"
   matched$match_by_threshold[matched$matched_site > 0 & matched$miss_matched_site > 0] = "partial_match"

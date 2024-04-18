@@ -18,10 +18,6 @@ function(rna_meta, chrom, output_prefix, reference = "Default",
     gene_ref = system.file(paste("extdata", "Reference", "Gene_GRCh38.98.bed", sep=.Platform$file.sep), package = "SpliPath")
     intron_coding = system.file(paste("extdata", "Reference", "Intron_GRCh38.98.proteincoding.bed", sep=.Platform$file.sep), package = "SpliPath") 
     intron_noncoding = system.file(paste("extdata", "Reference", "Intron_GRCh38.98.noncoding.bed", sep=.Platform$file.sep), package = "SpliPath") 
-    
-    gene_ref = paste("../SpliPath/data/Reference/", "Gene_GRCh38.98.bed", sep=.Platform$file.sep)
-    intron_coding = paste("../SpliPath/data/Reference/", "Intron_GRCh38.98.proteincoding.bed", sep=.Platform$file.sep)
-    intron_noncoding = paste("../SpliPath/data/Reference/", "Intron_GRCh38.98.noncoding.bed", sep=.Platform$file.sep)
     merged_junc = "example_chr1.txt.gz"
     
   }else{

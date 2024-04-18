@@ -49,24 +49,24 @@ function(junc_anno_file, read_count_file, tissues_leafcutter_pvals_file, gdb_pat
   #   junc_var_region = read.table(junc_var_region, header=T, sep="\t", stringsAsFactors = F, check.names = F)
   # }
  
-  .func=function(){
-  # TESTING
-  rna_meta = "SpliPath-test/example_RNAseq_meta.txt"
-  wgs_meta = "SpliPath-test/example_DNA_meta.txt"
-  gdb_path = "SpliPath-test/example_rvatData.gdb"
-  read_count_file = "SpliPath-test/example_chr1.txt.gz"
-  junc_anno = "SpliPath-test/example_chr1_anno.txt.gz"
-  junc_var_region = read.table("SpliPath-test/example_chr1_variant_region.txt.gz", header=T, sep="\t", stringsAsFactors = F, check.names = F)
-  splice_prediction=list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL"), 
-                         dbscSNV = c("rf_score", "ada_score"))
-  cohort_name = "pheno"
-  allele_freq = "gdb"
-  as_annotated = c("in.ensembl", "in.snaptron")
-  tissues_leafcutter_pvals_file = list(motor_cortex = "SpliPath-test/leafcutter/example_LeafCutter_motor_cortex_outlier_pVals.txt", 
-                                       frontal_cortex = "SpliPath-test/leafcutter/example_LeafCutter_frontal_cortex_outlier_pVals.txt", 
-                                       cervical = "SpliPath-test/leafcutter/example_LeafCutter_cervical_outlier_pVals.txt", 
-                                       lumbar = "SpliPath-test/leafcutter/example_LeafCutter_lumbar_outlier_pVals.txt")
-  }
+  # .func=function(){
+  # # TESTING
+  # rna_meta = "SpliPath-test/example_RNAseq_meta.txt"
+  # wgs_meta = "SpliPath-test/example_DNA_meta.txt"
+  # gdb_path = "SpliPath-test/example_rvatData.gdb"
+  # read_count_file = "SpliPath-test/example_chr1.txt.gz"
+  # junc_anno = "SpliPath-test/example_chr1_anno.txt.gz"
+  # junc_var_region = read.table("SpliPath-test/example_chr1_variant_region.txt.gz", header=T, sep="\t", stringsAsFactors = F, check.names = F)
+  # splice_prediction=list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL"), 
+  #                        dbscSNV = c("rf_score", "ada_score"))
+  # cohort_name = "pheno"
+  # allele_freq = "gdb"
+  # as_annotated = c("in.ensembl", "in.snaptron")
+  # tissues_leafcutter_pvals_file = list(motor_cortex = "SpliPath-test/leafcutter/example_LeafCutter_motor_cortex_outlier_pVals.txt", 
+  #                                      frontal_cortex = "SpliPath-test/leafcutter/example_LeafCutter_frontal_cortex_outlier_pVals.txt", 
+  #                                      cervical = "SpliPath-test/leafcutter/example_LeafCutter_cervical_outlier_pVals.txt", 
+  #                                      lumbar = "SpliPath-test/leafcutter/example_LeafCutter_lumbar_outlier_pVals.txt")
+  # }
   
   ### Read-in input files first
   rna_meta = read.table(rna_meta, sep="\t", header = T, stringsAsFactors = F)
@@ -84,10 +84,10 @@ function(junc_anno_file, read_count_file, tissues_leafcutter_pvals_file, gdb_pat
   
   junc_var_region = juncVariantRegion(novel_junc, output_prefix = output_prefix, reference = reference)
   junc_var_region = junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "event", "gene.name", "gene.id")]
+  junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "event", "gene.name", "gene.id")] = sapply(junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "event", "gene.name", "gene.id")] , FUN=as.vector)
   colnames(junc_var_region)[2:3] = c("start", "end")
-  junc_var_region[, c("start", "end")] = sapply(junc_var_region[, c("start", "end")], FUN = as.numeric)
   junc_var_region = junc_var_region[order(junc_var_region$chr, junc_var_region$start), ]
-  
+
   # Get variants and annotation from GDB
   pred_field = paste(paste0(names(splice_prediction), ".*"), collapse = ", ")
   query = sprintf("select VAR_id, var.CHROM, var.POS, var.REF, var.ALT, %s from var ", pred_field)
@@ -117,17 +117,13 @@ function(junc_anno_file, read_count_file, tissues_leafcutter_pvals_file, gdb_pat
   vars = vars[order(vars$CHROM, as.integer(vars$POS)), ]
 
   ### Map variant to aberrant splicing region
-  # var2junc = bedr::bedr(engine = "bedtools", 
-  #                        params = "-d -t all", 
-  #                        input = list(a = vars, b = junc_var_region ), 
-  #                        method = "closest", check.chr = FALSE , check.merge=F, check.valid = F)
   vars_gr = GenomicRanges::makeGRangesFromDataFrame(vars, start.field = "POS", end.field = "POS", keep.extra.columns = T )
   junc_var_region_gr = GenomicRanges::makeGRangesFromDataFrame(junc_var_region, starts.in.df.are.0based = T, keep.extra.columns = T )
   overlaps = GenomicRanges::findOverlaps(vars_gr, junc_var_region_gr)
-  vars_gr = as.data.frame(vars_gr[queryHits(overlaps)], stringsAsFactors = F, row.names = NULL)
+  vars_gr = as.data.frame(vars_gr[data.frame(overlaps)$queryHits], stringsAsFactors = F, row.names = NULL)
   vars_gr = vars_gr[, c("seqnames", "start", names(splice_prediction), "VAR_id", "DNA_variant")]
   colnames(vars_gr) = c("chr", "pos", names(splice_prediction), "VAR_id", "DNA_variant")
-  junc_var_region_gr = as.data.frame(junc_var_region_gr[subjectHits(overlaps)], stringsAsFactors = F, row.names = NULL)
+  junc_var_region_gr = as.data.frame(junc_var_region_gr[data.frame(overlaps)$subjectHits], stringsAsFactors = F, row.names = NULL)
   junc_var_region_gr = junc_var_region_gr[, c("seqnames", "start", "end", "strand", "junc", "event", "gene.name", "gene.id")]
   colnames(junc_var_region_gr) = c("region.chr", "region.start", "region.end", "region.strand", "junc", "event", "gene.name", "gene.id")
   var2junc = cbind(vars_gr, junc_var_region_gr)
@@ -139,10 +135,10 @@ function(junc_anno_file, read_count_file, tissues_leafcutter_pvals_file, gdb_pat
 
   geno = rvat::getGT(mygdb, VAR_id=unique(var2junc$VAR_id), cohort=cohort_name)
   geno = rvat::flipToMinor(geno)
-  if (allele_freq == "gdb"){
+  if (source_allele_freq == "cohort"){
     AF = data.frame(rvat::getAF(geno))
-  }else if (class(allele_freq) == "list"){
-    AF = rvat::getAnno(mygdb, VAR_id = unique(var2junc$VAR_id), table = allele_freq[["gdb_table"]], fields = allele_freq[["af_field"]])
+  }else if (class(source_allele_freq) == "list"){
+    AF = rvat::getAnno(mygdb, VAR_id = unique(var2junc$VAR_id), table = source_allele_freq[["gdb_table"]], fields = source_allele_freq[["af_field"]])
   }
   colnames(AF) = c("AF")
   
@@ -155,9 +151,7 @@ function(junc_anno_file, read_count_file, tissues_leafcutter_pvals_file, gdb_pat
   # psi = read.table(psi_file, header=T, sep="\t", stringsAsFactors = F, check.names = F)
   # psi = psi[!duplicated(psi[, c("chr", "start", "end", "strand", "gene.id")]), ]
   # rownames(psi) = paste(psi$chr, psi$start, psi$end, psi$strand, psi$gene.id, sep=":")
-  # 
-  
-  
+
   tissue_map = data.frame()
   for (tissue in names(tissues_leafcutter_pvals_file)){
     
@@ -204,7 +198,9 @@ function(junc_anno_file, read_count_file, tissues_leafcutter_pvals_file, gdb_pat
       tissue_map[!is.na(tissue_map[pred_tool])  &  tissue_map[pred_tool] >= min_splice_score[pred_tool] & is.na(tissue_map$SpliceAI_pred_match_junction), "sQTL_candidate" ] = T
     }
   }
-  tissue_map[rowSums(tissue_map[paste0("LeafCutter_pVal_", names(tissues_leafcutter_pvals_file))], na.rm=T) < min_nr_tissue, "sQTL_candidate"] = F  
+
+  tissue_map[, paste0("LeafCutter_pVal_", names(tissues_leafcutter_pvals_file))] = sapply(tissue_map[, paste0("LeafCutter_pVal_", names(tissues_leafcutter_pvals_file))], as.numeric)
+  tissue_map[rowSums(tissue_map[, paste0("LeafCutter_pVal_", names(tissues_leafcutter_pvals_file))] <= max_LeafCutter_Pval , na.rm=T) < min_nr_tissue, "sQTL_candidate"] = F  
   tissue_map[tissue_map$AF > max_allele_freq, "sQTL_candidate"] = F
   
   output_file = gzfile(sprintf("%s_crossref.txt.gz", output_prefix), "w")

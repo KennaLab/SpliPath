@@ -34,13 +34,13 @@ This tutorial shows how to nominate ur-sQTL by integrating outlier splicing anal
 ### Step 1. Data preperation
 
 SpliPath performs paired DNA-RNAseq analysis using:
-* 1) A tab-delimited metadata table of the RNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', 'Group', 'Tissue' columns and a 'Path' column which specify the paths to the splicing junction BED files of each sample (e.g. ```SpliPath/Example_data/example_RNAseq_meta.txt``` )
-* 2) Splicing junction data in BED format (e.g. ```SpliPath/Example_data/regtools_junction/*``` )
-* 3) LeafCutter splicing outlier analysis output (e.g. ```SpliPath/Example_data/example_LeafCutter_outlier_pVals.txt``` )
+1 A tab-delimited metadata table of the RNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', 'Group', 'Tissue' columns and a 'Path' column which specify the paths to the splicing junction BED files of each sample (e.g. ```SpliPath/Example_data/example_RNAseq_meta.txt``` )
+2. Splicing junction data in BED format (e.g. ```SpliPath/Example_data/regtools_junction/*``` )
+3. LeafCutter splicing outlier analysis output (e.g. ```SpliPath/Example_data/example_LeafCutter_outlier_pVals.txt``` )
 
-* 4) A tab-delimited metadata table of the DNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', and 'Group' (e.g. ```SpliPath/Example_data/example_DNA_meta.txt``` )
-* 5) Genomic variants in VCF format (e.g.  ```SpliPath/Example_data/example_rvatData.vcf``` ). It should includes all samples in the metadata table.
-* 6) SpliceAI and dbscSNV prediction (e.g. ```SpliPath/Example_data/example_chr1_varAnno_SpliceAI.txt``` & ```SpliPath/Example_data/example_chr1_varAnno_dbscSNV.txt```. There are pre-computed SpliceAI scores (https://github.com/Illumina/SpliceAI), and pre-computed dbscSNV scores (http://www.liulab.science/dbscsnv.html) in VCF format.)
+4. A tab-delimited metadata table of the DNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', and 'Group' (e.g. ```SpliPath/Example_data/example_DNA_meta.txt``` )
+5. Genomic variants in VCF format (e.g.  ```SpliPath/Example_data/example_rvatData.vcf``` ). It should includes all samples in the metadata table.
+6. SpliceAI and dbscSNV prediction (e.g. ```SpliPath/Example_data/example_chr1_varAnno_SpliceAI.txt``` & ```SpliPath/Example_data/example_chr1_varAnno_dbscSNV.txt```. There are pre-computed SpliceAI scores (https://github.com/Illumina/SpliceAI), and pre-computed dbscSNV scores (http://www.liulab.science/dbscsnv.html) in VCF format.)
 
 See [Appendix](https://github.com/KennaLab/SpliPath/blob/main/SpliPath_Tutorial_Appendix.md) for the commands of running RegTools, LeafCutter and SpliceAI for generating the input files above.
 
@@ -73,7 +73,7 @@ dbscsnv_pred_path <- "example_chr1_varAnno_dbscSNV.txt"
 dbscsnv_pred <- read.table(dbscsnv_pred_path, header = TRUE, sep = "\t")
 uploadAnno(object = mygdb, name = "dbscSNV", value = dbscsnv_pred) 
 ```
-Users can also upload other variants annotation to GDB and include them into analysis in Step 5.
+Users can also upload other variants annotation to GDB and include them into analysis in Step 3.
 
 ##### (Optional) Customize reference files
 The default reference genomic annotations are from Ensembl GRCh38.98 GTF file and Snaptron annotation. Users can create customized reference file using ```prepareGenoRef``` function.
@@ -114,20 +114,20 @@ The ur-sQTL candidates is nominated by function ```mapVariantJunc```.
 
 The arguments are 
 1. Junction and variants inputs:
-* 'junc_anno_file' and 'read_count_file' are the files generated in Step 2.
-* 'tissues_leafcutter_pvals_file' lists paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under a tissue. The tissues should be the same with those in the RNAseq sample metadata file.
-* 'gdb_path' is the GDB file of DNA variants generated in Step 1. The table of phenotype data should be specified in 'chort_name'.
-* 'rna_meta' and 'wgs_meta' is the file of phenotype / metadata of the RNA and DNA sequencing samples. Both of them should have 'SubjectID', 'SampleID', and 'Group' to specify which individual the sample is collected and which phenotype group the individuals belong to. In addition, 'rna_meta' should have 'Tissue' column, which specify the tissue source of the RNAseq sample.
-* 'as_annotated' defines annotation sources (should be in colnames in junc_anno_file) that were combined to determine whether a junction is novel. 
+* ```junc_anno_file``` and ```read_count_file``` are the files generated in Step 2.
+* ```tissues_leafcutter_pvals_file``` lists paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under a tissue. The tissues should be the same with those in the RNAseq sample metadata file.
+* ```gdb_path``` is the GDB file of DNA variants generated in Step 1. The table of phenotype data should be specified in ```cohort_name```.
+* ```rna_meta``` and ```wgs_meta``` is the file of phenotype / metadata of the RNA and DNA sequencing samples. Both of them should have 'SubjectID', 'SampleID', and 'Group' to specify which individual the sample is collected and which phenotype group the individuals belong to. In addition, 'rna_meta' should have 'Tissue' column, which specify the tissue source of the RNAseq sample.
+* ```as_annotated``` defines annotation sources (should be in colnames in junc_anno_file) that were combined to determine whether a junction is novel. 
 
 2. Thresholds to nominate ur-sQTL
-* max_LeafCutter_Pval is the maximum LeafCutter P value of a novel junction to nominate ultra rare sQTL candidate
-* min_nr_tissue requires LeafCutter P value of a junction should be under the threshold in at least this number of tissues
-* source_allele_freq is the source of the variants allele frequency. If set to "cohort", the allele frequency is calcuated from the cohort provided by the argument "cohort_name"
-* max_allele_freq is the aximum allele frequency to nominate ultra rare sQTL candidate 
-* splice_prediction is the splice-altering prediction to annotate the DNA variants. A splice prediction tool may provide more then one score. The   
-* min_splice_score is the min splice score of each prediction tools to nominate ur-sQTL candidate.
-* SpliceAI_default_reference suggests whether SpliceAI predictions are pre-computed or SpliceAI default annotation were used when running SpliceAI
+* ```max_LeafCutter_Pval``` is the maximum LeafCutter P value of a novel junction to nominate ultra rare sQTL candidate
+* ```min_nr_tissue``` requires LeafCutter P value of a junction should be under the threshold in at least this number of tissues
+* ```source_allele_freq``` is the source of the variants allele frequency. If set to "cohort", the allele frequency is calcuated from the cohort provided by the argument "cohort_name"
+* ```max_allele_freq``` is the aximum allele frequency to nominate ultra rare sQTL candidate 
+* ```splice_prediction``` is the splice-altering prediction to annotate the DNA variants. A splice prediction tool may provide more then one score. The   
+* ```min_splice_score``` is the min splice score of each prediction tools to nominate ur-sQTL candidate.
+* ```SpliceAI_default_reference``` suggests whether SpliceAI predictions are pre-computed or SpliceAI default annotation were used when running SpliceAI
 
 ```{r}
 var2junc = mapVariantJunc( junc_anno_file = "example_chr1_anno.txt.gz", 
@@ -170,7 +170,7 @@ browserData(junc_count = c("example_chr1.txt.gz"),
                                                  lumbar = "leafcutter/example_LeafCutter_lumbar_outlier_pVals.txt"),
             output_dir = "browser_junction")
 ```
-* If Step 2 and 3 were performed per chromosome, input files of ```junc_count```, ```junc_psi```, ```junc_anno```, ```hotspot```, should be vectors of matched file names for all the chromosomes. 
+* If Step 2 and 3 were performed per chromosome, input files of ```junc_count```, ```junc_anno```, ```var2junc```, should be vectors of matched file names for all the chromosomes. 
 
 In the output directory, there will be four types of files:
 1) "number_of_novel_junction_per_subject.txt" records the total number of novel junctions per RNAseq sample,
@@ -178,12 +178,10 @@ In the output directory, there will be four types of files:
 3) "geneID_geneName_leafcutter_pval.txt.gz" are junction-sample LeafCutter P values table per gene,
 4) "geneID_geneName_crossref.txt.gz" are the mapped ur-sQTL candidates per gene.  
 
-The other files necessary for SpliPath browser are (the input or output files in Step 2-6):
+The other files necessary for SpliPath browser are (the input or output files in Step 1-3):
 1) RNAseq sample meta data file (e.g. example_RNAseq_meta.txt)
 2) DNA sequencing sample meta data file (e.g. example_DNA_meta.txt)
-3) GDB file (e.g. rvatData.gdb)
-4) Gene reference file (e.g. Gene_GRCh38.98.bed)
-5) Exon reference file (e.g. Exon_GRCh38.98.proteincoding.bed)
+3) GDB file (e.g. example_rvatData.gdb)
 
 #### Step 4.2 Launch data browser
 

@@ -34,7 +34,7 @@ This tutorial shows how to nominate ur-sQTL by integrating outlier splicing anal
 ### Step 1. Data preperation
 
 SpliPath performs paired DNA-RNAseq analysis using:
-1 A tab-delimited metadata table of the RNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', 'Group', 'Tissue' columns and a 'Path' column which specify the paths to the splicing junction BED files of each sample (e.g. ```SpliPath/Example_data/example_RNAseq_meta.txt``` )
+1. A tab-delimited metadata table of the RNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', 'Group', 'Tissue' columns and a 'Path' column which specify the paths to the splicing junction BED files of each sample (e.g. ```SpliPath/Example_data/example_RNAseq_meta.txt``` )
 2. Splicing junction data in BED format (e.g. ```SpliPath/Example_data/regtools_junction/*``` )
 3. LeafCutter splicing outlier analysis output (e.g. ```SpliPath/Example_data/example_LeafCutter_outlier_pVals.txt``` )
 

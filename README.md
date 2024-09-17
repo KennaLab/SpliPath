@@ -2,7 +2,7 @@
 
 ## Introduction
 
-SpliPath is developed to nominate ultra-rare splicing quantitative trait loci (ur-sQTL) in genomewide analyses of paried DNAseq and RNA splicing datasets. It serves to mitigate key challenges of distinguishing rare bona fide aberrant splicing events from abundant artefects, and to identify causal genetic factors responsible for these events. SpliPath provides genomewide splice junction annotation, ur-sQTL nomination and an interactive Shiny-based data visualization and analysis tool. It enables users to look beyond consensus splice sites for causal genetic variants in deeper intronic regions, and can be applied to analyse any dataset that includes matched DNA and RNA sequencing data for donors believed to harbour rare pathogenic splice-altering variants. 
+SpliPath was developed to functionally cluster genetic variants into collapsed splicing quantitative trait loci (csQTLs), which have similar effect on altering splicing. SpliPath aims to address two main difficulties in explaining missing heritability in rare disorders: effective methed to functionally interpret genetic variants and increase statistical power to establish associations between rare variants and phenotypes. First, SpliPath links the prediction of SpliceAI with reference transcriptomics data to identify mutations that induce splice changes actually occuring in patient cohorts or disease models. Second, SpliPath aggregates variants with similar functional consequences into csQTLs for more powerful genetic association analyses.
 
 ## Installation
 

@@ -5,25 +5,27 @@
 \title{Prepare data files for SpliPath data browser}
 \usage{
 browserData(
-  junc_count,
-  junc_anno,
-  tissues_leafcutter_pvals_file,
-  var2junc,
-  min_read = 5,
+  paired_data,
+  junc_anno_files,
+  cs_qtl_files,
+  tissues_leafcutter_pvals_file = NULL,
+  junc_count_files = NULL,
   output_dir = "."
 )
 }
 \arguments{
-\item{junc_count}{vector A list of output files of mergeJuncData funciton, which contain junction-sample read count table. The input file name list in the first four arguments should be matched.}
+\item{paired_data}{logical "TRUE" for paired data mode or "FALSE" for unpaired data mode. If TRUE, arguments tissues_leafcutter_pvals_file, junc_count_files, rna_meta, and wgs_meta are required. The function matches the paired samples by 'SubjectID' in the metadata.}
 
-\item{junc_anno}{vector A list of output files of annotateJunc function, which contain junction annotations.}
+\item{junc_anno_files}{vector A list of output files of annotateJunc function, which contain junction annotations.}
+
+\item{cs_qtl_files}{string The output file of collapsedsQTL function. One row in the the data.frame is an annotated DNA variant that mapped to a novel junction in a subject's tissues.}
 
 \item{tissues_leafcutter_pvals_file}{list The file paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under the tissue type. The tissues should be the same with those in the RNAseq sample metadata file.}
 
-\item{var2junc}{string or data.frame The output file or data.frame of mapVariantJunc function. One row in the the dataframe is an annotated DNA variant that mapped to a novel junction in a subject's tissues.}
+\item{junc_count_files}{vector A list of output files of mergeJuncData funciton, which contain junction-sample read count table. The input file name list in the first four arguments should be matched.}
 
 \item{output_dir}{string The path to data output directory.}
 }
 \description{
-Separate splice junction tables and sRV tables per gene. The separated files will be written in SpliPath_Browser/data/junction and SpliPath_Browser/data/sRV_candidate
+Make splice junction tables and csQTL tables for each gene.
 }

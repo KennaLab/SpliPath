@@ -127,8 +127,8 @@ make_gene_wise_plot <- function(
     geom_hline(yintercept=0,alpha=.9, size=1) +
     
     # label the junctions
-    ylim(YLIMN,YLIMP) +
-    scale_size_continuous(limits=c(0,10),guide='none')
+    ylim(YLIMN,YLIMP) #+
+    # scale_size_continuous(limits=c(0,10),guide='none')
     
     
   # ADDING EXON ANNOTATION

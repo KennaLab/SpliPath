@@ -2,10 +2,10 @@
 % Please edit documentation in R/juncVariantRegion_.R
 \name{juncVariantRegion_}
 \alias{juncVariantRegion_}
-\title{Find the intron disrupted by the novel junction and the two flanking exons}
+\title{Find the intron disrupted by the unannotated junction and the two flanking exons}
 \usage{
 juncVariantRegion_(junc, novel_junc, exon)
 }
 \description{
-Find the intron disrupted by the novel junction and the two flanking exons
+Find the intron disrupted by the unannotated junction and the two flanking exons
 }

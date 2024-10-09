@@ -21,12 +21,13 @@ function(novel_junc, output_prefix, reference = "Default"){
   exon = read.table(ref_exon, sep="\t", header = FALSE, stringsAsFactors = F) 
   colnames(exon) = c("chr", "start", "end", "exon.id", "gene.id", "strand")
   
+  novel_junc = novel_junc[novel_junc$event %in% c("exon_skipping", "novel_donor", "novel_acceptor"), ]
   novel_junc$junc = paste(novel_junc$chr, novel_junc$start, novel_junc$end, novel_junc$strand, novel_junc$gene.id, sep=":")
   rownames(novel_junc) = novel_junc$junc
   
   var_region = lapply(novel_junc$junc, FUN = juncVariantRegion_, novel_junc=novel_junc, exon=exon)
-  var_region = data.frame(do.call(rbind, var_region))
-  colnames(var_region)[24:25] = c("region.start", "region.end")
+  var_region = data.frame(do.call(rbind, var_region), stringsAsFactors = F)
+  colnames(var_region)[(ncol(var_region) - 1):ncol(var_region)] = c("region.start", "region.end")
   
   # output_file = gzfile(sprintf("%s_variant_region.txt.gz", output_prefix), "w")
   # write.table(var_region, output_file, sep="\t", quote=F, row.names = F)

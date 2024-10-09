@@ -4,10 +4,10 @@
 \alias{mergeJuncData}
 \title{Merge junction data of samples to a junction - sample data frame}
 \usage{
-mergeJuncData(sample_path_file, chrom, output_prefix = "")
+mergeJuncData(sample_list, chrom, output_prefix = "")
 }
 \arguments{
-\item{sample_path_file}{string Name of tab-delimited file which contain two columns: 1, unique sample ids; 2, paths to the junction files.}
+\item{sample_list}{string or data.frame Tab-delimited file which contain at least two columns: 1, unique sample ids; 2, paths to the junction files.}
 
 \item{chrom}{string The junctions in this chromosome will be merged among samples.}
 

@@ -8,7 +8,8 @@
 #' @export
 prepareGenoRef <-
 function(gtf_file, intron_bed, output_dir){
-
+  if (!dir.exists(output_dir)) {dir.create(output_dir)}
+    
   gtf2df = function(gtf_file){
    gtf = rtracklayer::import(gtf_file)
    as.data.frame(gtf)

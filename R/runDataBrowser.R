@@ -9,7 +9,7 @@
 #' @import shiny
 #' @export
 runDataBroswer <-
-function(rna_meta, dna_meta, gdb_path, data_dir, reference = "Default"){
+function(paired_data, gdb_path, data_dir, rna_meta = NULL, dna_meta = NULL, reference = "Default"){
     wd = getwd()
     upload_file <<- list()
     
@@ -17,29 +17,36 @@ function(rna_meta, dna_meta, gdb_path, data_dir, reference = "Default"){
       upload_file$gene_table <<- read.table(system.file(paste("extdata", "Reference", "Gene_GRCh38.98.bed", sep = .Platform$file.sep), package = "SpliPath"), header=F, sep="\t", stringsAsFactors = F)
       upload_file$exon_table <<- read.table(system.file(paste("extdata", "Reference", "Exon_GRCh38.98.proteincoding.bed", sep = .Platform$file.sep), package = "SpliPath"), header=F, sep="\t", stringsAsFactors = F)
     }else{
-      upload_file$gene_table <<- read.table(sprintf(paste(reference, "Gene.bed", sep = .Platform$file.sep), header=F, sep="\t", stringsAsFactors = F))
-      upload_file$exon_table <<- read.table(sprintf(paste(reference, "Exon.proteincoding.bed", sep = .Platform$file.sep), header=F, sep="\t", stringsAsFactors = F))
+      upload_file$gene_table <<- read.table(sprintf(paste(reference, "Gene_GRCh38.98.bed", sep = .Platform$file.sep), header=F, sep="\t", stringsAsFactors = F))
+      upload_file$exon_table <<- read.table(sprintf(paste(reference, "Exon_GRCh38.98.proteincoding.bed", sep = .Platform$file.sep), header=F, sep="\t", stringsAsFactors = F))
     }
     colnames(upload_file$gene_table) <<- c("chr", "start", "end", "gene.id", "gene.name", "strand", "gene.type")
     colnames(upload_file$exon_table) <<- c("chr", "start", "end", "exon.id", "gene.id", "strand")
     upload_file$gene_table <<- upload_file$gene_table[, c("gene.id", "gene.name")]
     upload_file$exon_table$gene.name <<- upload_file$gene_table[match(upload_file$exon_table$gene.id, upload_file$gene_table$gene.id), "gene.name"]
     
-    upload_file$rna_meta <<- read.table(rna_meta, header=T, sep="\t")
-    upload_file$rna_meta <<- upload_file$rna_meta[, !colnames(upload_file$rna_meta) %in% c("Path")]
+    if (paired_data){
+      upload_file$rna_meta <<- read.table(rna_meta, header=T, sep="\t")
+      upload_file$rna_meta <<- upload_file$rna_meta[, !colnames(upload_file$rna_meta) %in% c("Path")]
     
-    upload_file$tissues <<- levels(as.factor(upload_file$rna_meta$Tissue))
-    
-    upload_file$wgs_meta <<- read.table(dna_meta, header=T, sep="\t")
+      upload_file$tissues <<- levels(as.factor(upload_file$rna_meta$Tissue))
+      
+      upload_file$wgs_meta <<- read.table(dna_meta, header=T, sep="\t")
+    }
     
     upload_file$gdb_path <<- paste(wd, gdb_path, sep=.Platform$file.sep)
     
     upload_file$browser_data_dir <<- paste(wd, data_dir, sep=.Platform$file.sep)
     
-    upload_file$gene_splice <<- read.table(paste0(upload_file$browser_data_dir, .Platform$file.sep, "number_of_novel_junction_per_subject.txt"), header=T, sep="\t", stringsAsFactors = F, check.names = F)
+    # upload_file$gene_splice <<- read.table(paste0(upload_file$browser_data_dir, .Platform$file.sep, "number_of_novel_junction_per_subject.txt"), header=T, sep="\t", stringsAsFactors = F, check.names = F)
     
-    upload_file$view_gene_list <<- sapply(strsplit(list.files(path = upload_file$browser_data_dir, pattern = "_intron_count.txt.gz$"), split="_"), "[", 2 )
+    upload_file$view_gene_list <<- sapply(strsplit(list.files(path = upload_file$browser_data_dir, pattern = "_csQTL.txt.gz$"), split="_"), "[", 2 )
     
-    browser_app = paste(system.file(package = "SpliPath"), "SpliPath_Browser", sep= .Platform$file.sep)
-    runApp(browser_app)
+    if (paired_data){
+      browser_app = paste(system.file(package = "SpliPath"), "SpliPath_Browser_paired", sep= .Platform$file.sep)
+      runApp(browser_app)
+    }else{
+      browser_app = paste(system.file(package = "SpliPath"), "SpliPath_Browser_unpaired", sep= .Platform$file.sep)
+      runApp(browser_app)
+    }
 }

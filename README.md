@@ -2,7 +2,7 @@
 
 ## Introduction
 
-SpliPath was developed to functionally cluster genetic variants into collapsed splicing quantitative trait loci (csQTLs), which have similar effect on altering splicing. SpliPath aims to address two main difficulties in explaining missing heritability in rare disorders: effective methed to functionally interpret genetic variants and increase statistical power to establish associations between rare variants and phenotypes. First, SpliPath links the prediction of SpliceAI with reference transcriptomics data to identify mutations that induce splice changes actually occuring in patient cohorts or disease models. Second, SpliPath aggregates variants with similar functional consequences into csQTLs for more powerful genetic association analyses.
+SpliPath is designed to identify and functionally cluster splice-altering variants in WGS that have similar effects on RNA splicing. We refer to these variants as collapsed splicing quantitative trait loci (csQTLs). SpliPath aims to address two main difficulties in explaining missing heritability in rare disorders: effective method to functionally interpret genetic variants and increase statistical power to establish associations between rare variants and phenotypes. First, SpliPath links the prediction of SpliceAI with reference transcriptomics data to identify genetic variants that induce splice changes actually occuring in disease-relevant transcriptomics profiles. Second, SpliPath aggregates variants with similar functional consequences into csQTLs for more powerful genetic association analyses.
 
 ## Installation
 

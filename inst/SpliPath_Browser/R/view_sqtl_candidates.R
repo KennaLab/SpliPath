@@ -89,7 +89,7 @@ draw_gene_red_box = function(gene_name, gene_table, dir_path, tissue, rna_meta, 
     gene_red_box = list(SpliceAI = draw_Spliceai(sqtl_candidate, tissue, min_read, min_psi, min_spliceai), dbscSNV = draw_dbscSNV(sqtl_candidate, tissue, min_read, min_psi, min_dbscsnv)) 
   }else{
     sqtl_candidate = data.frame()
-    gene_red_box = list(SpliceAI = empty_ggplot_with_info(sprintf("No ur-sQTL candidates")), dbscSNV = empty_ggplot_with_info(sprintf("No sRV candidates")))
+    gene_red_box = list(SpliceAI = empty_ggplot_with_info(sprintf("No ur-sQTL candidates")), dbscSNV = empty_ggplot_with_info(sprintf("No ur-sQTL candidates")))
   }
   
   intron_sample = count_cryptic_intron_gene(tissue, rna_meta, sqtl_candidate, gene.id = name2id(gene_table, gene_name)[1], min_psi, min_read)
@@ -104,7 +104,8 @@ select_sqtl_candidate = function(sqtl_candidate, tissue, predictor, bursh_psi_mi
   # sqtl_candidate = separate(sqtl_candidate, col="Coordinates_of_novel_junc", sep=":-|:\\+", into = c("Coordinates_of_novel_junc", NA))
   
   psi_colname = paste0("LeafCutter_pVal_", tissue)
-  sqtl_candidate[is.na(sqtl_candidate)] = 0
+  sqtl_candidate[[psi_colname]][is.na(sqtl_candidate[[psi_colname]])] = 1
+  sqtl_candidate[is.na(sqtl_candidate)] = 0 ### 
   sqtl_candidate = sqtl_candidate[-log10(sqtl_candidate[[psi_colname]]) >= bursh_psi_min & -log10(sqtl_candidate[[psi_colname]]) <= bursh_psi_max & sqtl_candidate[[predictor]] >= bursh_score_min & sqtl_candidate[[predictor]] <= bursh_score_max, ]
 
   sqtl_candidate

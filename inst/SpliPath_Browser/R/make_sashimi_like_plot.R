@@ -450,7 +450,7 @@ plot_splicing =  function(dir_path, gdb_path, rna_meta, wgs_meta, subject, gene.
   # rownames(psi_gene) = paste(psi_gene$chr, psi_gene$start, psi_gene$end, psi_gene$strand, sep=":")
   # psi_gene = psi_gene[rowSums(psi_gene[, as.character(meta$SampleID), drop=F]) != 0, ]
   psi_gene = read.table(sprintf("%s%s%s_%s_leafcutter_pval.txt.gz", dir_path, .Platform$file.sep,  gene.id, gene.name), header=T, row.names = 1, sep="\t", stringsAsFactors = F, check.names = F)
-
+  
   ### Pre define output
   intron_meta = data.frame()
   counts = data.frame()

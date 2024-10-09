@@ -1,4 +1,4 @@
-#' Find the intron disrupted by the novel junction and the two flanking exons
+#' Find the intron disrupted by the unannotated junction and the two flanking exons
 #' 
 #' @export
 juncVariantRegion_ <-

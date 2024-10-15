@@ -6,29 +6,26 @@ library(gridExtra)
 
 print(getwd())
 ui = fluidPage(
-  
-
+ 
+   
   navbarPage(
     title = ("SpliPath - csQTL analysis using unpaired genomic and transcriptomic data "),
+    tabPanel(
+      title = "Gene csQTL",
+      value = "sashimiPage",
+      
       sidebarLayout(
         sidebarPanel(
           selectInput(inputId = "sqtl_gene", 
-                    label = "Search csQTL candidates in gene:",
-                    choices = upload_file$view_gene_list),
+                      label = "Search csQTL candidates in gene:",
+                      choices = upload_file$view_gene_list),
           
-          # uiOutput("update_red_box_tissues"),
-          # #selectInput(inputId = "sqtl_tissue", 
-          # #            label = "Tissue", 
-          # #            choices = upload_file$tissues), 
           actionButton(inputId = "plot_gene_splice", 
-           label = "Search")
+                       label = "Search")
         ),
         mainPanel(
           verticalLayout(
-            titlePanel("Gene splicing"),
-            fluidRow(
-              column(12, align="left", p('\nZoom in by selecting a region in the whole gene splicing plot.'))
-            ),
+            titlePanel("Gene csQTL"),
             fluidRow(
               column(12, align="center", plotOutput(outputId = "gene_wise_splice", brush = "zoom_in", height="200px"))
             ),
@@ -36,28 +33,20 @@ ui = fluidPage(
               column(12, align="center", plotOutput(outputId = "gene_wise_var", height="200px"))
             ),
             fluidRow(
-               column(12, align="center", DT::dataTableOutput(outputId = "splice_table"))
+              column(12, align="center", DT::dataTableOutput(outputId = "splice_table"))
             )
-            # fluidRow(
-            #   column(12, align="left", titlePanel("csQTL splicing"))
-            # ),
-            # fluidRow(
-            #   column(12, align="left", p('\nDouble click the junction in the first splicing plot to visualize junction expression in subject groups. \n'))
-            # ),
-            # fluidRow(
-            #   column(12, align="center", plotOutput(outputId = "sashimi1st", dblclick = "sashimi_click", height="200px"))
-            # ),
-            # fluidRow(
-            #   column(12, align="center", uiOutput("sashimi.ui", height="200px"))
-            # ), 
-            # 
           )
-          
-
         )
+      )
+    ),
+    tabPanel(
+      title = "Help",
+      fluidRow(
+        column(8, offset = 2, align="center", img(src='Guide.png', width=1100, align="center"))
       )
     )
   )
+)
 
 server = function(input, output, session) {
   
@@ -116,51 +105,6 @@ server = function(input, output, session) {
   }, server=T, rownames= FALSE, options = list(pageLength = 10, scrollX=TRUE)
   )
   
-  # # Zoom in
-  # observeEvent(input$zoom_in, { 
-  #   
-  #   locate_zoom_in=function(sashimi2gg, zoom_xmin, zoom_xmax){
-  #     zoom_xmin = round((zoom_xmin - sashimi2gg$start[1])*100 + sashimi2gg$startv[1])
-  #     zoom_xmax = round((zoom_xmax - sashimi2gg$start[1])*100 + sashimi2gg$startv[1])
-  #     paste(sashimi2gg$chr[1], zoom_xmin, zoom_xmax, sep=":")
-  #   }
-  #   
-  #   splice = plot_splicing(upload_file$browser_data_dir, 
-  #                          upload_file$gdb_path,
-  #                          gene.name=toupper(input$sqtl_gene),
-  #                          exon_table = upload_file$exon_table, 
-  #                          gene_table = upload_file$gene_table,
-  #                          coord=locate_zoom_in(rv$gene_wise_sashimi2gg, input$zoom_in$xmin, input$zoom_in$xmax),
-  #                          gene_wise_only = T)
-  #                          
-  #   rv$sashimi = splice$local_plots
-  #   rv$splice_table = splice$local_table
-  #   rv$splice_counts = splice$local_counts
-  #   rv$splice_psi = splice$local_psi
-  #   rv$sashimi2gg = splice$local_sashimi2gg
-  #   
-  #   session$resetBrush("zoom_in")
-  # })
-  # 
-  # # Local splicing plot
-  # sashimi_height = reactive({
-  #   (length(rv$sashimi) - 1)*150
-  # })
-  # 
-  # output$sashimi1st = renderPlot({
-  #   rv$sashimi[[1]]
-  # }, height=200)
-  # output$sashimi = renderPlot({
-  #   gridExtra::grid.arrange(grobs = rv$sashimi[-1], ncol=1)
-  # })
-  # output$sashimi.ui = renderUI({
-  #   plotOutput("sashimi", height = sashimi_height())
-  # })
-  # output$splice_table = DT::renderDataTable({
-  #   rv$splice_table
-  # }, server=T, selection = "single", rownames= FALSE, options = list(pageLength = 10, scrollX=TRUE)
-  # )
-  # 
 
 }
 

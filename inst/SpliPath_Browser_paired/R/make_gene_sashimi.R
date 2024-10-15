@@ -35,7 +35,7 @@ make_gene_wise_plot <- function(
   junction_colour <- "red"
   cryptic_colour <- "grey"
   mainPalette <- c(junction_colour, cryptic_colour)
-  names(mainPalette) = c("Annotated", "Novel")
+  names(mainPalette) = c("Annotated", "Unannotated")
   
   min_height=0
   max_height=0
@@ -76,7 +76,7 @@ make_gene_wise_plot <- function(
     edge$Group <- i
     edge$xtext <-start+l/2
     edge$ytext <- -( (l^(yFactor) / 2) + yConstant)  # magic formula here
-    edge$verdict <- intron_meta$verdict[i] #ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Novel")
+    edge$verdict <- intron_meta$verdict[i] #ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Unannotated")
     edge
   })
   
@@ -96,7 +96,7 @@ make_gene_wise_plot <- function(
     edge$Group <- i
     edge$xtext <-start+l/2
     edge$ytext <- (l^(yFactor) / 2)  + yConstant
-    edge$verdict <- intron_meta$verdict[i] #ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Novel")
+    edge$verdict <- intron_meta$verdict[i] #ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Unannotated")
     edge
   })
   

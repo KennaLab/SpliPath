@@ -4,7 +4,7 @@
 juncVariantRegion_ <-
 function(junc, novel_junc, exon){
   exon_gene = exon[exon$gene.id == novel_junc[junc, "gene.id"],]
-  if (((novel_junc[junc, "strand"] == "+") & (novel_junc[junc, "event"] == "novel_acceptor")) | ((novel_junc[junc, "strand"] == "-") & (novel_junc[junc, "event"] == "novel_donor"))){
+  if (((novel_junc[junc, "strand"] == "+") & (novel_junc[junc, "event"] == "unannotated_acceptor")) | ((novel_junc[junc, "strand"] == "-") & (novel_junc[junc, "event"] == "unannotated_donor"))){
     upstream_exon = exon_gene[exon_gene$end == novel_junc[junc, "start"],]
     upstream_exon$dist = novel_junc[junc, "start"] - upstream_exon$start
     upstream_exon = upstream_exon[upstream_exon$dist == max(upstream_exon$dist),][1,]
@@ -19,7 +19,7 @@ function(junc, novel_junc, exon){
     expand_end = downstream_exon$end
     if (is.na(expand_end)){expand_end = novel_junc[junc, "end"]}
     
-  }else if(((novel_junc[junc, "strand"] == "+") & (novel_junc[junc, "event"] == "novel_donor")) | ((novel_junc[junc, "strand"] == "-") & (novel_junc[junc, "event"] == "novel_acceptor"))){
+  }else if(((novel_junc[junc, "strand"] == "+") & (novel_junc[junc, "event"] == "unannotated_donor")) | ((novel_junc[junc, "strand"] == "-") & (novel_junc[junc, "event"] == "unannotated_acceptor"))){
     upstream_exon = exon_gene[(exon_gene$end != novel_junc[junc, "start"]) & (exon_gene$start < novel_junc[junc, "start"]),]
     if (nrow(upstream_exon) == 0){upstream_exon = exon_gene[(exon_gene$end == novel_junc[junc, "start"]),]}
     upstream_exon$end_dist = novel_junc[junc, "start"] - upstream_exon$end 

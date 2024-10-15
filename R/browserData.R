@@ -54,11 +54,17 @@ browserData<-
         
 
       gene_list = unique(junc_anno[, c("gene.id", "gene.name")])
+      gene_list = gene_list[gene_list$gene.id %in% sRV$Gene_id, ]
+      
       for (g in 1:nrow(gene_list)){
         gene_id = gene_list[g, "gene.id"]
         gene_name = toupper(gene_list[g, "gene.name"])
         
         junc_anno_gene = subset(junc_anno, gene.id == gene_id)
+        
+        gz_file = gzfile( paste(output_dir, sprintf("%s_%s_csQTL.txt.gz", gene_id, gene_name), sep=.Platform$file.sep), "w")
+        write.table(subset(sRV, Gene_id == gene_id), gz_file, row.names = F, col.names=T, sep='\t', quote=F)
+        close(gz_file)
         
         if (paired_data){
           gz_file = gzfile( paste(output_dir, sprintf("%s_%s_intron_count.txt.gz", gene_id, gene_name), sep=.Platform$file.sep), "w")
@@ -69,9 +75,7 @@ browserData<-
           write.table(leafcutter_pvals_merged[(rownames(leafcutter_pvals_merged) %in% junc_anno_gene$pos), ], gz_file, row.names = T, col.names=T, sep='\t', quote=F)
           close(gz_file)
         }
-        gz_file = gzfile( paste(output_dir, sprintf("%s_%s_csQTL.txt.gz", gene_id, gene_name), sep=.Platform$file.sep), "w")
-        write.table(subset(sRV, Gene_id == gene_id), gz_file, row.names = F, col.names=T, sep='\t', quote=F)
-        close(gz_file)
+        
         
       }
     }

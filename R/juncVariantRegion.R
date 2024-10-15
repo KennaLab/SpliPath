@@ -21,7 +21,7 @@ function(novel_junc, output_prefix, reference = "Default"){
   exon = read.table(ref_exon, sep="\t", header = FALSE, stringsAsFactors = F) 
   colnames(exon) = c("chr", "start", "end", "exon.id", "gene.id", "strand")
   
-  novel_junc = novel_junc[novel_junc$event %in% c("exon_skipping", "novel_donor", "novel_acceptor"), ]
+  novel_junc = novel_junc[novel_junc$event %in% c("exon_skipping", "unannotated_donor", "unannotated_acceptor"), ]
   novel_junc$junc = paste(novel_junc$chr, novel_junc$start, novel_junc$end, novel_junc$strand, novel_junc$gene.id, sep=":")
   rownames(novel_junc) = novel_junc$junc
   

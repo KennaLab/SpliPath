@@ -45,7 +45,7 @@ annotateQueryJunc <-
     ensembl_pos = unique(c(paste(intron_coding$chr, intron_coding$start, intron_coding$end, intron_coding$strand, sep=':'),
                            paste(intron_noncoding$chr, intron_noncoding$start, intron_noncoding$end, intron_noncoding$strand, sep=':')))
     
-    
+    print("Annotating query junctions ...")
     query_junc = read.table(query_junc, sep="\t", header=F, stringsAsFactors = F)[,c(1:3,6)]
     colnames(query_junc) = c("chr", "start", "end", "strand")
 

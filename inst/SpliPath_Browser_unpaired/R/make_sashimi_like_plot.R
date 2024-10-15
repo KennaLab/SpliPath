@@ -143,7 +143,7 @@ make_sashimi_like_plot <- function(
   junction_colour <- "red"
   cryptic_colour <- "grey"
   mainPalette <- c(junction_colour, cryptic_colour)
-  names(mainPalette) = c("Annotated", "Novel")
+  names(mainPalette) = c("Annotated", "Unannotated")
   
   min_height=0
   max_height=0
@@ -189,7 +189,7 @@ make_sashimi_like_plot <- function(
       edge$Group <- i
       edge$xtext <-start+l/2
       edge$ytext <- -( (l^(yFactor) / 2) + yConstant)  # magic formula here
-      edge$verdict <- ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Novel")
+      edge$verdict <- ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Unannotated")
       edge
     })
     
@@ -211,7 +211,7 @@ make_sashimi_like_plot <- function(
       edge$xtext <-start+l/2
       edge$ytext <- (l^(yFactor) / 2)  + yConstant
       #edge$SIZE <- intron_meta$prop[i]+1
-      edge$verdict <- ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Novel")
+      edge$verdict <- ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Unannotated")
       edge
     })
     
@@ -306,8 +306,7 @@ make_sashimi_like_plot <- function(
     
     # add junction colours
     mainPalette <- c(cbbPalette, mainPalette)
-    #names(mainPalette)[ (length(mainPalette)-1):length(mainPalette) ] <- c("Annotated","Novel")
-    
+
     # fit exons within the cluster scale
     invert_mapping=function(pos){
       if (pos %in% s) coords[as.character(pos)] else
@@ -382,11 +381,13 @@ make_sashimi_like_plot <- function(
     }
     
     # add exons to plots
+    exon_df$x = sapply(exon_df$x, FUN = max, my_xlim[1])
+    exon_df$xend = sapply(exon_df$xend, FUN = min, my_xlim[2])
     for (i in 1:length(plots) ){
       plots[[i]] <- plots[[i]] +
-        geom_segment( data=exon_df, aes(x=x,y=y,xend=xend,yend=yend, colour = label), alpha=1, size=6) +
-        geom_segment( data = exon_df, aes(x = x, xend = x+0.01, y = y, yend = yend), colour = "white", size = 6, alpha = 1) +
-        geom_segment( data = exon_df, aes(x = xend-0.01, xend=xend, y = y, yend = yend), colour = "white", size = 6, alpha = 1)
+        geom_segment( data=exon_df, aes(x=x,y=y,xend=xend,yend=yend, colour = label), alpha=1, size=6) # +
+        # geom_segment( data = exon_df, aes(x = x, xend = x+0.01, y = y, yend = yend), colour = "white", size = 6, alpha = 1) +
+        # geom_segment( data = exon_df, aes(x = xend-0.01, xend=xend, y = y, yend = yend), colour = "white", size = 6, alpha = 1)
     }
   }
   # TITLE
@@ -424,8 +425,8 @@ plot_splicing = function(dir_path, gdb_path, gene.name, exon_table, gene_table, 
   }
   
   srv_candidate_tbl = read.table(sprintf("%s%s%s_%s_csQTL.txt.gz", dir_path, .Platform$file.sep, gene.id, gene.name), header=T, sep="\t", stringsAsFactors = F, check.names = F)
-  novel_junc = unique(srv_candidate_tbl[, c("Coordinates_of_novel_junc", "Gene", "Gene_id", "Event")])
-  novel_junc = tidyr::separate(novel_junc, col="Coordinates_of_novel_junc", into = c("chr", "start", "end", "strand"))
+  novel_junc = unique(srv_candidate_tbl[, c("Coordinates_of_unannotated_junc", "Gene", "Gene_id", "Event")])
+  novel_junc = tidyr::separate(novel_junc, col="Coordinates_of_unannotated_junc", into = c("chr", "start", "end", "strand"))
   novel_junc[, c("start", "end")] = sapply(novel_junc[, c("start", "end")], FUN = as.integer)
   novel_junc$read_counts = 5
   novel_junc$verdict = "Novel"
@@ -473,6 +474,9 @@ plot_splicing = function(dir_path, gdb_path, gene.name, exon_table, gene_table, 
     }
   }
   
-  list(local_plots=sashimi_plots$plots, local_table=unique(srv_candidate_tbl[, c("Gene", "DNA_variant", "SpliceAI", "Coordinates_of_novel_junc", "Event", "csQTL_candidate")]), local_counts=counts, local_psi = psi, local_sashimi2gg = sashimi_plots$edges,
+  csqtl_table = unique(srv_candidate_tbl[, c("Gene", "DNA_variant", "SpliceAI", "Coordinates_of_unannotated_junc", "Event", "match_by_threshold")])
+  colnames(csqtl_table) = c("Gene", "DNA_variant", "SpliceAI", "Coordinates_of_unannotated_junc", "Event", "SpliceAI_pred_match_junc")
+  
+  list(local_plots=sashimi_plots$plots, local_table=csqtl_table, local_counts=counts, local_psi = psi, local_sashimi2gg = sashimi_plots$edges,
        gene_wise_plots = gene_wise_plots, gene_wise_sashimi2gg = gene_wise$edges)
 }

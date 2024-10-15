@@ -6,16 +6,28 @@ length_transform <- function(g){ g/100 }
 make_variant_plot = function(gdb_path, subject, gene.name, chr, srv_candidate_tbl, start, end, wgs_id, wgs_meta, expand_width, plot_xlim){
   chrom = paste0("chr", chr)
   
+  geno_theme_empty <- theme_bw(base_size = 11 )
+  geno_theme_empty$panel.background = element_rect(fill="white", colour = "white")
+  geno_theme_empty$axis.line = element_line()
+  geno_theme_empty$line = element_blank()
+  geno_theme_empty$rect <- element_blank()
+  geno_theme_empty$axis.title.x=element_blank()
+  geno_theme_empty$axis.text=element_blank()
+  geno_theme_empty$axis.ticks.x=element_blank()
+  geno_theme_empty$axis.line.y = element_line(arrow = grid::arrow(length = unit(0.2, "cm"), ends = "last"))
+  geno_theme_empty$legend.position="bottom"
+  geno_theme_empty$legend.justification = 'right'
+  geno_theme_empty$legend.text=element_text(size=10)
+  
   ### Get variant Info
   mygdb=rvat::gdb(gdb_path)
   spliceaiTerm = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL")
-  
+
   vars <- RSQLite::dbGetQuery(mygdb, 
                               statement = sprintf("select VAR_id, var.POS, var.CHROM, var.REF, var.ALT,
-                              SpliceAI.spliceaiSYMBOL, SpliceAI.%s, dbscSNV.ada_score, dbscSNV.rf_score
+                              SpliceAI.spliceaiSYMBOL, SpliceAI.%s
                               from var
                               left join SpliceAI using ('VAR_id')
-                              left join dbscSNV using ('VAR_id')
                               where var.CHROM in ('%s') and var.POS between %s and %s
                               ", paste(spliceaiTerm, collapse=", SpliceAI."), paste0(paste0("chr", chr), "' , '", sub("^chr", "", chr), "' , '", chr), start - expand_width, end + expand_width))
   
@@ -41,21 +53,10 @@ make_variant_plot = function(gdb_path, subject, gene.name, chr, srv_candidate_tb
   }else{
     for (i in 1:length(wgs_id)){
       wgs_id_ = wgs_id[i]
-      vars$geno = assays(GT)$GT[as.character(vars$VAR_id), wgs_id_]
-      vars = subset(vars, (!is.na(geno) & geno != 0))
-
-      geno_theme_empty <- theme_bw(base_size = 11 )
-      geno_theme_empty$panel.background = element_rect(fill="white", colour = "white")
-      geno_theme_empty$axis.line = element_line()
-      geno_theme_empty$line = element_blank()
-      geno_theme_empty$rect <- element_blank()
-      geno_theme_empty$axis.title.x=element_blank()
-      geno_theme_empty$axis.text=element_blank()
-      geno_theme_empty$axis.ticks.x=element_blank()
-      geno_theme_empty$axis.line.y = element_line(arrow = grid::arrow(length = unit(0.2, "cm"), ends = "last"))
-      geno_theme_empty$legend.position="bottom"
-      geno_theme_empty$legend.justification = 'right'
-      geno_theme_empty$legend.text=element_text(size=10)
+      if (nrow(vars) > 0){
+        vars$geno = assays(GT)$GT[as.character(vars$VAR_id), wgs_id_]
+        vars = subset(vars, (!is.na(geno) & geno != 0))
+      }
       
       if (nrow(vars) > 0){
         vars$dist = vars$POS - start
@@ -152,7 +153,7 @@ make_sashimi_like_plot <- function(
   junction_colour <- "red"
   cryptic_colour <- "grey"
   mainPalette <- c(junction_colour, cryptic_colour)
-  names(mainPalette) = c("Annotated", "Novel")
+  names(mainPalette) = c("Annotated", "Unannotated")
   
   min_height=0
   max_height=0
@@ -199,7 +200,7 @@ make_sashimi_like_plot <- function(
       edge$Group <- i
       edge$xtext <-start+l/2
       edge$ytext <- -( (l^(yFactor) / 2) + yConstant)  # magic formula here
-      edge$verdict <- ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Novel")
+      edge$verdict <- ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Unannotated")
       edge
     })
     
@@ -222,7 +223,7 @@ make_sashimi_like_plot <- function(
       edge$xtext <-start+l/2
       edge$ytext <- (l^(yFactor) / 2)  + yConstant
       #edge$SIZE <- intron_meta$prop[i]+1
-      edge$verdict <- ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Novel")
+      edge$verdict <- ifelse( intron_meta$verdict[i] == "Annotated", yes = "Annotated", no ="Unannotated")
       edge
     })
     
@@ -317,8 +318,7 @@ make_sashimi_like_plot <- function(
     
     # add junction colours
     mainPalette <- c(cbbPalette, mainPalette)
-    #names(mainPalette)[ (length(mainPalette)-1):length(mainPalette) ] <- c("Annotated","Novel")
-    
+
     # fit exons within the cluster scale
     invert_mapping=function(pos){
       if (pos %in% s) coords[as.character(pos)] else
@@ -393,11 +393,14 @@ make_sashimi_like_plot <- function(
     }
     
     # add exons to plots
+    exon_df$x = sapply(exon_df$x, FUN = max, my_xlim[1])
+    exon_df$xend = sapply(exon_df$xend, FUN = min, my_xlim[2])
+    
     for (i in 1:length(plots) ){
       plots[[i]] <- plots[[i]] +
-        geom_segment( data=exon_df, aes(x=x,y=y,xend=xend,yend=yend, colour = label), alpha=1, size=6) +
-        geom_segment( data = exon_df, aes(x = x, xend = x+0.01, y = y, yend = yend), colour = "white", size = 6, alpha = 1) +
-        geom_segment( data = exon_df, aes(x = xend-0.01, xend=xend, y = y, yend = yend), colour = "white", size = 6, alpha = 1)
+        geom_segment( data=exon_df, aes(x=x,y=y,xend=xend,yend=yend, colour = label), alpha=1, size=6) #+
+        # geom_segment( data = exon_df, aes(x = x, xend = x+0.01, y = y, yend = yend), colour = "white", size = 6, alpha = 1) +
+        # geom_segment( data = exon_df, aes(x = xend-0.01, xend=xend, y = y, yend = yend), colour = "white", size = 6, alpha = 1)
     }
   }
   # TITLE
@@ -442,7 +445,7 @@ plot_splicing =  function(dir_path, gdb_path, rna_meta, wgs_meta, subject, gene.
   counts_gene = counts_gene[rowSums(counts_gene[, as.character(meta$SampleID), drop=F]) != 0, ]
   chr = counts_gene$chr[1]
   counts_gene$verdict = "Annotated"
-  counts_gene$verdict[counts_gene$event %in% c("novel_acceptor", "novel_donor", "exon_skipping")] = "Novel"
+  counts_gene$verdict[counts_gene$event %in% c("unannotated_acceptor", "unannotated_donor", "exon_skipping")] = "Unannotated"
 
   intron_anno = counts_gene[, !colnames(counts_gene) %in% as.character(rna_meta$SampleID)]
   
@@ -486,13 +489,12 @@ plot_splicing =  function(dir_path, gdb_path, rna_meta, wgs_meta, subject, gene.
     # Add junction match variant prediction info
     if (is.data.frame(srv_candidate_tbl)){
       if ("SpliceAI_pred_match_junction" %in% colnames(srv_candidate_tbl)){
-        srv_candidate_tbl$Coordinates_of_novel_junction = srv_candidate_tbl$Coordinates_of_novel_junc # paste(srv_candidate_tbl$Coordinates_of_novel_junc, srv_candidate_tbl$Strand, sep=":")
         variants_ls = unique(srv_candidate_tbl$DNA_variant)
         variants_ls_colnames = paste0("Match SpliceAI pred of ", variants_ls)
         for (v in variants_ls){
           match_colname = paste0("Match SpliceAI pred of ", v)
-          match_junc = unique(subset(srv_candidate_tbl, DNA_variant == v & Coordinates_of_novel_junction %in% rownames(intron_meta), select = c(Coordinates_of_novel_junction, SpliceAI_pred_match_junction)))
-          intron_meta[match_junc$Coordinates_of_novel_junction, match_colname] = match_junc$SpliceAI_pred_match_junction
+          match_junc = unique(subset(srv_candidate_tbl, DNA_variant == v & Coordinates_of_unannotated_junc %in% rownames(intron_meta), select = c(Coordinates_of_unannotated_junc, SpliceAI_pred_match_junction)))
+          intron_meta[match_junc$Coordinates_of_unannotated_junc, match_colname] = match_junc$SpliceAI_pred_match_junction
         }
         intron_meta = intron_meta[,c("chr", "start", "end", "strand", "verdict", variants_ls_colnames, as.character(meta$SampleID))]
       }else{

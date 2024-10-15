@@ -34,10 +34,12 @@ annotateLeafCutterJunc <-
     }
     
     ### Merge the junctions
+    print("Merging splicing junctions from multiple samples ...")
     merged_junc = mergeJuncData(rna_meta, chrom, output_prefix = output_prefix)
     rownames(merged_junc) = paste(merged_junc$chr, merged_junc$start, merged_junc$end, merged_junc$strand, sep=":")
     
     ### Annotate junctions in the junction files of all samples, and then select the novel junctions
+    print("Annotating junctions ...")
     junc_anno = annotateJunc(merged_junc[, c('chr', 'start', 'end', 'strand')], output_prefix, reference = reference, addition_annotation = addition_annotation )
 
     if (!is.null(addition_annotation)){
@@ -82,10 +84,8 @@ annotateLeafCutterJunc <-
           leafcutter_pvals_pass_tissue = dplyr::full_join(leafcutter_pvals_pass_tissue, leafcutter_pvals, by = c("SubjectID", "Junc"), multiple = "all")
         }
       }
-      print(head(leafcutter_pvals_pass_tissue))
       leafcutter_pvals_pass_tissue_idx = rowSums(leafcutter_pvals_pass_tissue[, paste0("Outlier_P_", names(tissues_leafcutter_pvals_file)) ] < max_LeafCutter_Pval, na.rm=T) >= min_nr_tissue  
       leafcutter_pvals_pass_tissue = leafcutter_pvals_pass_tissue[leafcutter_pvals_pass_tissue_idx, ]   
-      print(dim(leafcutter_pvals_pass_tissue))
     }
     
     leafcutter_pvals_pass_tissue = dplyr::left_join(leafcutter_pvals_pass_tissue, novel_junc, by = c("Junc" = "pos"), multiple = "all")

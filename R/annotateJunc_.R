@@ -54,13 +54,13 @@ annotateJunc_ <-
     junc_map$map[!junc_map$start.map & !junc_map$end.map] = "unmapped"
     
     junc_map$event = 'annotated'
-    junc_map$event[!junc_map$start.anno & junc_map$end.anno & (junc_map$strand == "+")] = "novel_donor"
-    junc_map$event[!junc_map$start.anno & junc_map$end.anno & (junc_map$strand == "-")] = "novel_acceptor"
-    junc_map$event[junc_map$start.anno & !junc_map$end.anno & (junc_map$strand == "+")] = "novel_acceptor"
-    junc_map$event[junc_map$start.anno & !junc_map$end.anno & (junc_map$strand == "-")] = "novel_donor"
+    junc_map$event[!junc_map$start.anno & junc_map$end.anno & (junc_map$strand == "+")] = "unannotated_donor"
+    junc_map$event[!junc_map$start.anno & junc_map$end.anno & (junc_map$strand == "-")] = "unannotated_acceptor"
+    junc_map$event[junc_map$start.anno & !junc_map$end.anno & (junc_map$strand == "+")] = "unannotated_acceptor"
+    junc_map$event[junc_map$start.anno & !junc_map$end.anno & (junc_map$strand == "-")] = "unannotated_donor"
     junc_map$event[junc_map$start.anno & junc_map$end.anno & !junc_map$coding.transcript & !junc_map$noncoding.transcript] = "exon_skipping"
     junc_map$event[!junc_map$coding.transcript & junc_map$noncoding.transcript] = "noncoding_transcript"
-    junc_map$event[!junc_map$start.anno & !junc_map$end.anno & !junc_map$noncoding.transcript & !junc_map$in.ensembl] = "novel_d&a_site"
+    junc_map$event[!junc_map$start.anno & !junc_map$end.anno & !junc_map$noncoding.transcript & !junc_map$in.ensembl] = "unannotated_d&a_site"
     
     exon_skipping_idx = which(junc_map$event == "exon_skipping")
     exon_skipping_anno = lapply(exon_skipping_idx, FUN = function(idx, junc_map){
@@ -82,7 +82,7 @@ annotateJunc_ <-
     junc_map[exon_skipping_idx, "event"] = exon_skipping_anno
     
     # Select junctions mapped within protein-coding genes
-    junc_map = junc_map[junc_map$map == "mapped" & junc_map$coding.gene & junc_map$event != "novel_d&a_site",]
+    junc_map = junc_map[junc_map$map == "mapped" & junc_map$coding.gene & junc_map$event != "unannotated_d&a_site",]
     
     # To remove the less likely map when junctions were mapped to multiple genes
     junc_map = junc_map[!(junc_map$coding.transcript == FALSE & junc_map$noncoding.transcript == FALSE & junc_map$in.ensembl == TRUE),]

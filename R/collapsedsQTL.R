@@ -45,9 +45,9 @@ collapsedsQTL <-
     
     junc_var_region = juncVariantRegion(unique(junc_anno[, c('chr', 'start', 'end', 'strand', 'gene.id', 'gene.name', 'event')]), 
                                         output_prefix = output_prefix, reference = reference)
-    junc_var_region$Coordinates_of_novel_junc = paste(junc_var_region$chr, junc_var_region$start, junc_var_region$end, junc_var_region$strand, sep=":")
-    junc_var_region = junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_novel_junc", "event", "gene.name", "gene.id")]
-    junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_novel_junc", "event", "gene.name", "gene.id")] = sapply(junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_novel_junc", "event", "gene.name", "gene.id")] , FUN=as.vector)
+    junc_var_region$Coordinates_of_unannotated_junc = paste(junc_var_region$chr, junc_var_region$start, junc_var_region$end, junc_var_region$strand, sep=":")
+    junc_var_region = junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")]
+    junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")] = sapply(junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")] , FUN=as.vector)
     colnames(junc_var_region)[2:3] = c("start", "end")
     junc_var_region = junc_var_region[order(junc_var_region$chr, junc_var_region$start), ]
     
@@ -97,8 +97,8 @@ collapsedsQTL <-
     colnames(vars_gr) = c("chr", "pos", names(spliceai_prediction), "VAR_id", "DNA_variant", "AF")
     
     junc_var_region_gr = as.data.frame(junc_var_region_gr[data.frame(overlaps)$subjectHits], stringsAsFactors = F, row.names = NULL)
-    junc_var_region_gr = junc_var_region_gr[, c("seqnames", "start", "end", "strand", "junc", "Coordinates_of_novel_junc", "event", "gene.name", "gene.id")]
-    colnames(junc_var_region_gr) = c("region.chr", "region.start", "region.end", "region.strand", "junc", "Coordinates_of_novel_junc", "Event", "Gene", "Gene_id")
+    junc_var_region_gr = junc_var_region_gr[, c("seqnames", "start", "end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")]
+    colnames(junc_var_region_gr) = c("region.chr", "region.start", "region.end", "region.strand", "junc", "Coordinates_of_unannotated_junc", "Event", "Gene", "Gene_id")
     var2junc = cbind(vars_gr, junc_var_region_gr)
     var2junc$VAR_id = as.character(var2junc$VAR_id)
     var2junc$Var_region = paste(var2junc$region.chr, var2junc$region.start, var2junc$region.end, sep=":")
@@ -106,18 +106,19 @@ collapsedsQTL <-
     rm(junc_var_region, vars)
     
     # Match observed junction with SpliceAI prediction
+    print("Matching variants with junctions ...")
     spliceai_pred_match = matchPredNObs(gdb_path = gdb_path, 
                                         cohort_name = cohort_name,
                                         var2junc, #tissue_map, 
-                                        min_SpliceAI_score = min_spliceai_score, 
+                                        min_spliceai_score = min_spliceai_score, 
                                         max_skip_exon = max_skip_exon,
                                         reference = reference,
-                                        SpliceAI_default_reference = spliceai_default_reference)
+                                        spliceai_default_reference = spliceai_default_reference)
 
     var2junc = dplyr::left_join(var2junc, 
                                 spliceai_pred_match[, !colnames(spliceai_pred_match) %in% 
                                                                 c("chr", "start", "end", "strand", "start.pos", "end.pos", "MaxDS", "AF", "spliceaiSG_idx", "spliceaiEG_idx", "spliceaiSL_idx", "spliceaiEL_idx")],
-                                by = c("VAR_id", "DNA_variant", "Coordinates_of_novel_junc", "Event", "Gene", "Gene_id", "Var_region"),
+                                by = c("VAR_id", "DNA_variant", "Coordinates_of_unannotated_junc", "Event", "Gene", "Gene_id", "Var_region"),
                                 multiple = "all")
     
     reads_colnames = colnames(junc_anno)[grepl("Reads_", colnames(junc_anno))]
@@ -127,11 +128,10 @@ collapsedsQTL <-
     if (paired_data){
       var_carrier = getVarCarrier(rna_meta, wgs_meta, unique(var2junc$VAR_id), mygdb, cohort_name)
       var2junc = dplyr::inner_join(var2junc, var_carrier, by = c("VAR_id"), multiple = "all")
-      var2junc = dplyr::inner_join(var2junc, junc_anno[, c("SubjectID", "Junc", "gene.id", "gene.name", reads_colnames, pval_colnames)], by = c("SubjectID", "Coordinates_of_novel_junc" = "Junc", "Gene" = "gene.name", "Gene_id" = "gene.id"), multiple = "all")
+      var2junc = dplyr::inner_join(var2junc, junc_anno[, c("SubjectID", "Junc", "gene.id", "gene.name", reads_colnames, pval_colnames)], by = c("SubjectID", "Coordinates_of_unannotated_junc" = "Junc", "Gene" = "gene.name", "Gene_id" = "gene.id"), multiple = "all")
     }
 
-    # var2junc = dplyr::inner_join(var2junc, junc_anno[, c("Junc", "gene.id", "gene.name")], by = c("Coordinates_of_novel_junc" = "Junc", "Gene" = "gene.name", "Gene_id" = "gene.id"))
-    
+
     ### Use thresholds to determine csQTL candidates
     var2junc$csQTL_candidate = F
     var2junc[var2junc$match_by_threshold %in% c("full_match", "partial_match"), "csQTL_candidate"] = T

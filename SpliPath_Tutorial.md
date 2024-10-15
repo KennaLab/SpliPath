@@ -55,6 +55,7 @@ See [Appendix](https://github.com/KennaLab/SpliPath/blob/main/SpliPath_Tutorial_
 We use [RVAT](https://github.com/kkenna/rvat) to store variant annotations, individual genotypes and other required data in SQLite based “.gdb” files. This format has been optimized to support efficient execution of SpliPath functions as well as a range of other rare variant analyses.
 ```{r}
 library(SpliPath)
+library(rvat)
 setwd("SpliPath/Example_data/")
 
 vcfpath <- "example_rvatData.vcf"
@@ -73,7 +74,7 @@ The variants annotation tables (SpliceAI predictions) can be uploaded into GDB b
 ```{r}
 spliceai_pred_path <- "example_chr1_varAnno_SpliceAI.txt"
 spliceai_pred <- read.table(spliceai_pred_path, header = TRUE, sep = "\t")
-uploadAnno(object = mygdb, name = "SpliceAI",value = spliceai_pred) # The 'name' parameter is the name of the variants annotation table in the GDB
+uploadAnno(object = mygdb, name = "SpliceAI", value = spliceai_pred) # The 'name' parameter is the name of the variants annotation table in the GDB
 ```
 Users can also upload other variants annotation to GDB and include them into analysis in Step 3.
 
@@ -109,7 +110,10 @@ tissues_leafcutter_pvals_file <- list(motor_cortex = "leafcutter/example_LeafCut
                                      frontal_cortex = "leafcutter/example_LeafCutter_frontal_cortex_outlier_pVals.txt", 
                                      cervical = "leafcutter/example_LeafCutter_cervical_outlier_pVals.txt", 
                                      lumbar = "leafcutter/example_LeafCutter_lumbar_outlier_pVals.txt")
+```
 
+* ```min_nr_tissue``` the LeafCutter P values of a junction are under the threshold in at least this number of tissues.
+```{r}
 annotateLeafCutterJunc(rna_meta = "example_RNAseq_meta.txt", 
                        chrom = 1, 
                        tissues_leafcutter_pvals_file,
@@ -122,7 +126,7 @@ annotateLeafCutterJunc(rna_meta = "example_RNAseq_meta.txt",
 The function outputs three files: 
 1. example_chr1.txt.gz contains junction read count table merged from all the samples. The unique junctions are in rows and samples are in columns; 
 2. example_chr1_anno.txt.gz contains the annotation of the junctions in the LeafCutter files. 
-3. example_chr1_leafcutter_outliers.txt.gz contains the annotation of the unannotated junction outliers, filtered by the provided max_LeafCutter_Pval and min_nr_tissue thresholds.
+3. example_chr1_leafcutter_outliers.txt.gz contains the information of the unannotated junction outliers, filtered by the provided max_LeafCutter_Pval and min_nr_tissue thresholds.
 
 Alternatively, if a simple list of splicing junctions will be used for further csQTL annotation, ```annotateQueryJunc``` is applied.
 ```{r}
@@ -142,14 +146,13 @@ The arguments are
 * ```junc_anno_file``` is the file containing the annotations of LeafCutter outlier junctions or query junction, generated in Step 2.
 * ```tissues_leafcutter_pvals_file``` lists paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under a tissue. The tissues should be the same with those in the RNAseq sample metadata file. e.g.
 * ```gdb_path``` is the GDB file of DNA variants generated in Step 1. The table of phenotype data should be specified in ```cohort_name```.
-* ```rna_meta``` and ```wgs_meta``` is the file of phenotype / metadata of the RNA and DNA sequencing samples. Both of them should have 'SubjectID', 'SampleID', and 'Group' to specify which individual the sample is collected and which phenotype group the individuals belong to. In addition, 'rna_meta' should have 'Tissue' column, which specify the tissue source of the RNAseq sample. The two files are not required for unpaired data analyses 
+* ```rna_meta``` and ```wgs_meta``` is the file of phenotype / metadata of the RNA and DNA sequencing samples. Both of them should have 'SubjectID', 'SampleID', and 'Group' to specify which individual the sample is collected and which phenotype group the individuals belong to. In addition, 'rna_meta' should have 'Tissue' column, which specify the tissue source of the RNAseq sample. The two files are not required for unpaired data analyses.
 
 2. Thresholds to nominates csQTLs
-* ```min_nr_tissue``` requires LeafCutter P value of a junction should be under the threshold in at least this number of tissues
-* ```max_allele_freq``` is the maximum allele frequency to nominate ultra rare sQTL candidate 
-* ```splice_prediction``` is the splice-altering prediction to annotate the DNA variants. The names of elements in the list are prediction tools, they should be in GDB database tables. The items are the scoring fields in the GDB database prediction tables A splice prediction tool may provide more then one scores. The maximum of the given scores will be used as the prediction of the corresponding tool for each variants. Default to:
+* ```max_allele_freq``` is the maximum allele frequency to nominate ultra rare sQTL candidate.
+* ```splice_prediction``` is the splice-altering prediction to annotate the DNA variants. The names of elements in the list are prediction tools, they should be in GDB database tables. The items are the scoring fields in the GDB database prediction tables A splice prediction tool may provide more then one scores. The maximum of the given scores will be used as the prediction of the corresponding tool for each variants. Default to list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL")):
 * ```min_splice_score``` is the min splice score of each prediction tools to nominate ur-sQTL candidate.
-* ```spliceai_default_reference``` suggests whether SpliceAI predictions are pre-computed or SpliceAI default annotation were used when running SpliceAI
+* ```spliceai_default_reference``` suggests whether SpliceAI predictions are pre-computed or SpliceAI default annotation were used when running SpliceAI.
 
 #### Paired WGS and RNAseq analyses
 
@@ -164,7 +167,6 @@ collapsedsQTL(paired_data = TRUE,
               wgs_meta = "example_DNA_meta.txt",
               max_allele_freq = 0.05,
               reference = "Default",
-              spliceai_prediction=list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL")),
               min_spliceai_score = 0.2,
               spliceai_default_reference = T,
               output_prefix = "example_chr1")
@@ -183,7 +185,6 @@ collapsedsQTL(junc_anno_file = "example_chr1_leafcutter_outliers.txt.gz",
               cohort_name = "pheno",
               max_allele_freq = 0.05,
               reference = "Default",
-              spliceai_prediction=list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL")),
               min_spliceai_score = 0.2,
               spliceai_default_reference = T,
               output_prefix = "example_chr1")
@@ -197,7 +198,6 @@ collapsedsQTL(paired_data = FALSE,
               cohort_name = "pheno",
               max_allele_freq = 0.05,
               reference = "Default",
-              spliceai_prediction=list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL")),
               min_spliceai_score = 0.2,
               spliceai_default_reference = T,
               output_prefix = "example_chr1_query_junc")
@@ -225,7 +225,7 @@ browserData(paired_data = TRUE,
 For unpaired data analyses, the argument ```junc_anno_file``` can take the output of both ```annotateLeafCutterJunc``` and ```annotateQueryJunc``` function; the argument ```cs_qtl_files``` take the output of ```collapsedsQTL``` function:
 ```{r}
 browserData(paired_data = FALSE,
-            junc_anno_files = c("example_chr1_leafcutter_anno.txt.gz"), 
+            junc_anno_files = c("example_chr1_anno.txt.gz"), 
             cs_qtl_files = c("example_chr1_unpaired_csQTL.txt.gz"), 
             output_dir = "browser_junction_unpaired")
 ```
@@ -240,9 +240,9 @@ browserData(paired_data = FALSE,
 * If Step 2 and 3 were performed per chromosome, arguments ```junc_count_files```, ```junc_anno_files```, and ```cs_qtl_files``` should be vectors of matched file names for all the chromosomes. 
 
 In the output directory, there will be four types of files:
-1) "geneID_geneName_intron_count.txt.gz" are junction-sample read count table per gene,
-2) "geneID_geneName_leafcutter_pval.txt.gz" are junction-sample LeafCutter P values table per gene,
-3) "geneID_geneName_csQTL.txt.gz" are the mapped ur-sQTL candidates per gene.  
+1) "geneID_geneName_intron_count.txt.gz" are junction-sample read count table per gene
+2) "geneID_geneName_leafcutter_pval.txt.gz" are junction-sample LeafCutter P values table per gene
+3) "geneID_geneName_csQTL.txt.gz" are the mapped ur-sQTL candidates per gene  
 
 The other files necessary for SpliPath browser are (the input or output files in Step 1-3):
 1) GDB file (e.g. example_rvatData.gdb)
@@ -256,9 +256,10 @@ If user preformed the data analysis in a remote computer cluster and prefer to l
 
 #### Paired WGS and RNAseq analyses
 ```{r}
-# 'data_dir' should be the same with 'output_dir' argument in browserData function.
-
 library(SpliPath)
+library(rvat)
+
+# 'data_dir' should be the same with 'output_dir' argument in browserData function.
 runDataBroswer(paired_data = TRUE,
                rna_meta = "example_RNAseq_meta.txt", 
                dna_meta = "example_DNA_meta.txt", 
@@ -276,7 +277,7 @@ runDataBroswer(paired_data = FALSE,
 
 ```
 
-The following graphic tutorial show how to use SpliPath to anwser splicing pathology questions:
-
+The following graphic tutorial show how to use the data browser to visualise and inspect csQTL candidates:
+![](https://github.com/KennaLab/SpliPath/blob/main/inst/SpliPath_Browser_paired/www/Guide.png)
 
 

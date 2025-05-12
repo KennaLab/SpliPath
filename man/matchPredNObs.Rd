@@ -9,6 +9,7 @@ matchPredNObs(
   cohort_name,
   var2junc,
   min_spliceai_score,
+  spliceai_table_name,
   max_skip_exon = 2,
   reference = "Default",
   spliceai_default_reference = FALSE
@@ -22,6 +23,8 @@ matchPredNObs(
 \item{var2junc}{string or data.frame One row in the the dataframe is an annotated DNA variant that mapped to a novel junction in a subject's tissues.}
 
 \item{min_spliceai_score}{float Minimum SpliceAI delta score. The predictions of splice sites that score higher than the minimum SpliceAI delta score will be matched with observed junctions.}
+
+\item{spliceai_table_name}{string The table of SpliceAI predictions in the GDB database}
 
 \item{max_skip_exon}{integer If a novel junction skips more exons than the provided number, it will be considered as "not match" to prediction. Default to 2.}
 

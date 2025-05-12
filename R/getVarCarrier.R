@@ -21,6 +21,7 @@ getVarCarrier <-
     # colnames(AF) = c("AF")
     
     geno_carrier = rvat::getCarriers(geno)
+    geno_carrier = geno_carrier[geno_carrier$IID %in% wgs_meta$SampleID, ]
     geno_carrier$SubjectID = unname(unlist(wgsid2subject[geno_carrier$IID]))
     # geno_carrier$AF = AF[as.character(geno_carrier$VAR_id), "AF"]
     

@@ -168,13 +168,7 @@ server = function(input, output, session) {
                                                      input$gene_spliceai_brush$xmin, input$gene_spliceai_brush$xmax, input$gene_spliceai_brush$ymin, input$gene_spliceai_brush$ymax)
     
   })
-  # observeEvent(input$gene_dbscsnv_brush, {
-  #   session$resetBrush("gene_spliceai_brush")
-  #   rv$select_sqtl_candidate = select_sqtl_candidate(rv$sqtl_candidate_tbl, input$sqtl_tissue, "dbscSNV", 
-  #                                                    input$gene_dbscsnv_brush$xmin, input$gene_dbscsnv_brush$xmax, input$gene_dbscsnv_brush$ymin, input$gene_dbscsnv_brush$ymax)
-  #   
-  # })
-  
+
   output$sqtl_candidate_tbl = DT::renderDataTable({
     rv$select_sqtl_candidate[, colnames(rv$select_sqtl_candidate) %in%  c("SubjectID", "Coordinates_of_unannotated_junc", "Event", "DNA_variant", "SpliceAI", "SpliceAI_pred_match_junction", "AF", "SpliceAI_pred_cryptic_exon")]
   }, server=T, selection = "single", rownames= FALSE, options = list(pageLength = 10, scrollX=TRUE))

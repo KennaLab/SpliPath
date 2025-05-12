@@ -46,8 +46,8 @@ Alternatively, a simple list of splicing junctions can also be used to nominate 
 1. A BED file containing the coordinates of the splicing junctions (e.g. ```SpliPath/Example_data/example_query_junction.bed``` ). 
 
 #### 2. Genomic variants
-1. Genomic variants in VCF format (e.g.  ```SpliPath/Example_data/example_rvatData.vcf``` ). It should includes all samples in the metadata table.
-2. SpliceAI prediction (e.g. ```SpliPath/Example_data/example_chr1_varAnno_SpliceAI.txt``` & ```SpliPath/Example_data/example_chr1_varAnno_dbscSNV.txt```. There are pre-computed SpliceAI scores (https://github.com/Illumina/SpliceAI), and pre-computed dbscSNV scores (http://www.liulab.science/dbscsnv.html) in VCF format.)
+1. Genomic variants in VCF format (e.g.  ```SpliPath/Example_data/example_rvatData.vcf.gz``` ). It should includes all samples in the metadata table.
+2. SpliceAI or Pangolin predictions (e.g. ```SpliPath/Example_data/example_chr1_varAnno_SpliceAI.txt``` & ```SpliPath/Example_data/example_chr1_varAnno_Pangolin.txt```. )
 3. A tab-delimited metadata table of the DNA sequencing samples. It should at least contain 'SubjectID', 'SampleID', and 'Group' (e.g. ```SpliPath/Example_data/example_DNA_meta.txt``` ). 
 
 See [Appendix](https://github.com/KennaLab/SpliPath/blob/main/SpliPath_Tutorial_Appendix.md) for the commands of running RegTools, LeafCutter and SpliceAI for generating the input files above.
@@ -139,20 +139,20 @@ The function outputs one file: example_chr1_query_junc_anno.txt.gz, which contai
 
 ### Step 3. Nominate csQTL
 
-The csQTLs are annotated by function ```collapsedsQTL```. Different modes will be used for paired and unpaired WGS - RNAseq data analyses.
+The csQTLs are annotated by function ```collapsedsQTL``` (applying SpliceAI predictions) or ```collapsedsQTL_pangolin``` (applying Pangolin predictions). Different modes will be used for paired and unpaired WGS - RNAseq data analyses.
 
 The arguments are 
 1. Junction and variants inputs:
-* ```junc_anno_file``` is the file containing the annotations of LeafCutter outlier junctions or query junction, generated in Step 2.
-* ```tissues_leafcutter_pvals_file``` lists paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under a tissue. The tissues should be the same with those in the RNAseq sample metadata file. e.g.
-* ```gdb_path``` is the GDB file of DNA variants generated in Step 1. The table of phenotype data should be specified in ```cohort_name```.
-* ```rna_meta``` and ```wgs_meta``` is the file of phenotype / metadata of the RNA and DNA sequencing samples. Both of them should have 'SubjectID', 'SampleID', and 'Group' to specify which individual the sample is collected and which phenotype group the individuals belong to. In addition, 'rna_meta' should have 'Tissue' column, which specify the tissue source of the RNAseq sample. The two files are not required for unpaired data analyses.
+* ```junc_anno_file``` defines the file containing the annotations of LeafCutter outlier junctions or query junction, generated in Step 2.
+* ```tissues_leafcutter_pvals_file``` defines a list of paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under a tissue. The tissues should be the same with those in the RNAseq sample metadata file. e.g.
+* ```gdb_path``` defines the GDB file of DNA variants generated in Step 1. The table of phenotype data should be specified in ```cohort_name```.
+* ```rna_meta``` and ```wgs_meta``` define the file of phenotype / metadata of the RNA and DNA sequencing samples. Both of them should have 'SubjectID', 'SampleID', and 'Group' to specify which individual the sample is collected and which phenotype group the individuals belong to. In addition, 'rna_meta' should have 'Tissue' column, which specify the tissue source of the RNAseq sample. The two files are not required for unpaired data analyses.
 
 2. Thresholds to nominates csQTLs
-* ```max_allele_freq``` is the maximum allele frequency to nominate ultra rare sQTL candidate.
-* ```splice_prediction``` is the splice-altering prediction to annotate the DNA variants. The names of elements in the list are prediction tools, they should be in GDB database tables. The items are the scoring fields in the GDB database prediction tables A splice prediction tool may provide more then one scores. The maximum of the given scores will be used as the prediction of the corresponding tool for each variants. Default to list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL")):
-* ```min_splice_score``` is the min splice score of each prediction tools to nominate ur-sQTL candidate.
-* ```spliceai_default_reference``` suggests whether SpliceAI predictions are pre-computed or SpliceAI default annotation were used when running SpliceAI.
+* ```max_allele_freq``` defines the maximum allele frequency to nominate ultra rare sQTL candidate.
+* ```spliceai_prediction```, ```pagnolin_prediction``` define the splice-altering prediction to annotate the DNA variants. The names of elements in the list are prediction tools, they should be in GDB database tables. The items are the scoring fields in the GDB database prediction tables A splice prediction tool may provide more then one scores. The maximum of the given scores will be used as the prediction of the corresponding tool for each variants. Default to 'spliceai_prediction=list(SpliceAI = c("spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL"))' or 'pangolin_prediction=list(pangolin = c("score_increase", "score_decrease")'
+* ```min_spliceai_score```, ```min_pangolin_score``` define the min splice score of SpliceAI or Pangolin predictions to nominate ur-sQTL candidate.
+* ```spliceai_default_reference``` defines whether SpliceAI predictions are pre-computed or SpliceAI default annotation were used when running SpliceAI.
 
 #### Paired WGS and RNAseq analyses
 
@@ -170,6 +170,22 @@ collapsedsQTL(paired_data = TRUE,
               min_spliceai_score = 0.2,
               spliceai_default_reference = T,
               output_prefix = "example_chr1")
+```
+
+Or, applying Pangolin predictions to nominate csQTL 
+```{r}
+collapsedsQTL_pangolin(paired_data = TRUE, 
+                       junc_anno_file = "example_chr1_leafcutter_outliers.txt.gz",
+                       gdb_path = "example_rvatData.gdb",
+                       cohort_name = "pheno",
+                       rna_meta = "example_RNAseq_meta.txt",
+                       wgs_meta = "example_DNA_meta.txt",
+                       max_allele_freq = 0.05,
+                       reference = "Default",
+                       pangolin_prediction=list(pangolin = c("score_increase", "score_decrease")),
+                       min_pangolin_score = 0.2,
+                       max_skip_exon = 2,
+                       output_prefix = "example_chr1_pangolin")
 ```
 The nominated csQTLs are written in example_chr1_csQTL_paired_csQTL.txt.gz file.
 One row in the the data.frame is an genetic variant that mapped to a unannotated junction in a subject's tissues. The LeafCutter P values and read count in tissues are in columns "Outlier_P_tissue" and "Reads_tissue". "match_by_threshold" column show whether the SpliceAI predicted splicing consequences of a variant match a unannotated junction; "pred_cryptic_exon" column show whether SpliceAI predict a cryptic exon (gain of an unannotated donor site and an unannotated acceptor site at the same time). "csQTL_candidate" column suggest whether the variant and unannotated junction is a sQTL candidate, based on the provided thresholds.

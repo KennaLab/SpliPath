@@ -72,7 +72,7 @@ annotateJunc_ <-
       span_exon_start = TRUE %in% ((ref_intron_gene$end > start) & (ref_intron_gene$end < end))
       span_exon_end = TRUE %in% ((ref_intron_gene$start > start) & (ref_intron_gene$start < end))
       
-      if ((length(intersect(start_transcript, end_transcript)) > 0) & (span_exon_start & span_exon_end)){
+      if ((length(base::intersect(start_transcript, end_transcript)) > 0) & (span_exon_start & span_exon_end)){
         return("exon_skipping")
       }else{return("alternative_intron")}
     },

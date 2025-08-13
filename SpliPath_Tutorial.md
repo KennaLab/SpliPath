@@ -70,11 +70,15 @@ cohort_pheno$IID = cohort_pheno$SampleID
 uploadCohort(object = mygdb, name = "pheno", value = cohort_pheno) # The 'name' parameter is the name of the cohort table in the GDB
 ```
 
-The variants annotation tables (SpliceAI predictions) can be uploaded into GDB by 
+The variants annotation tables (SpliceAI or Pangolin predictions) can be uploaded into GDB by 
 ```{r}
 spliceai_pred_path <- "example_chr1_varAnno_SpliceAI.txt"
 spliceai_pred <- read.table(spliceai_pred_path, header = TRUE, sep = "\t")
 uploadAnno(object = mygdb, name = "SpliceAI", value = spliceai_pred) # The 'name' parameter is the name of the variants annotation table in the GDB
+
+pangolin_pred_path <- "example_chr1_varAnno_Pangolin.txt"
+pangolin_pred <- read.table(pangolin_pred_path, header = TRUE, sep = "\t")
+uploadAnno(object = mygdb, name = "pangolin", value = pangolin_pred) # The 'name' parameter is the name of the variants annotation table in the GDB
 ```
 Users can also upload other variants annotation to GDB and include them into analysis in Step 3.
 
@@ -104,12 +108,18 @@ Considering computational capacity, we highly recommend performing Step 2-3 per 
 After data preparation, SpliPath starts with annotating the splicing junctions. The annotation include mapping the junctions to genes, finding unannotated splice sites and classifying splice events. Excluding possible gene fusion events and artefacts where the two splice sites of a junction are mapped two genes or neither of them are annotated. 
 
 If the splicing junctions are from LeafCutterMD outlier analysis, function ```annotateLeafCutterJunc``` is applied:
-* ```tissues_leafcutter_pvals_file``` lists paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under a tissue. The tissues should be the same with those in the RNAseq sample metadata file. e.g.
+* ```tissues_leafcutter_pvals_file``` defines paths to the LeafCutterMD analysis P values of each tissue type. Each element is a LeafCutter file path named under a tissue. The tissues should be the same with those in the RNAseq sample metadata file. Each element is a LeafCutterMD file path named under the tissue type. Since LeafCutterMD normally uses their input BAM file names as the sample names in their output files. The argument ```tissues_leafcutter_pvals_file``` should also contain an "colnamesToSampleID" element, which is a vector of RNAseq SampleIDs named by the matching column names in the LeafCutterMD files. The tissues should be the same with those in the RNAseq sample metadata file. e.g.
 ```{r}
+rna_meta = read.table("example_RNAseq_meta.txt", header=T, sep="\t", stringsAsFactors = F)
+colnames_to_sampleid = rna_meta$SampleID
+leafcutter_colnames = paste0(colnames_to_sampleid, ".Aligned.sorted")
+names(colnames_to_sampleid) = leafcutter_colnames
+
 tissues_leafcutter_pvals_file <- list(motor_cortex = "leafcutter/example_LeafCutter_motor_cortex_outlier_pVals.txt", 
                                      frontal_cortex = "leafcutter/example_LeafCutter_frontal_cortex_outlier_pVals.txt", 
                                      cervical = "leafcutter/example_LeafCutter_cervical_outlier_pVals.txt", 
-                                     lumbar = "leafcutter/example_LeafCutter_lumbar_outlier_pVals.txt")
+                                     lumbar = "leafcutter/example_LeafCutter_lumbar_outlier_pVals.txt",
+                                     colnamesToSampleID = colnames_to_sampleid)
 ```
 
 * ```min_nr_tissue``` the LeafCutter P values of a junction are under the threshold in at least this number of tissues.

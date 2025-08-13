@@ -75,12 +75,13 @@ function(gdb_path, cohort_name, var2junc, min_spliceai_score, spliceai_table_nam
     spliceai = spliceai[!is.na(spliceai$spliceaiGENE), ]
   }
   
-  
   ### Convert scores when REF is the minor allele
   GT = rvat::getGT(mygdb, VAR_id = spliceai$VAR_id, cohort=cohort_name)
-  spliceai$AF = rowData(GT)[as.character(spliceai$VAR_id), "AF"]
+  spliceai$AF = getAF(GT)[as.character(spliceai$VAR_id)]
   rm(GT)
-  spliceai[spliceai$AF > 0.5, spliceai_pred ] = spliceai[spliceai$AF > 0.5, c("spliceaiDS_AL", "spliceaiDS_AG", "spliceaiDS_DL", "spliceaiDS_DG", "spliceaiDP_AL", "spliceaiDP_AG", "spliceaiDP_DL", "spliceaiDP_DG") ]
+  if (sum(spliceai$AF > 0.5) > 0){
+    spliceai[spliceai$AF > 0.5, spliceai_pred ] = spliceai[spliceai$AF > 0.5, c("spliceaiDS_AL", "spliceaiDS_AG", "spliceaiDS_DL", "spliceaiDS_DG", "spliceaiDP_AL", "spliceaiDP_AG", "spliceaiDP_DL", "spliceaiDP_DG") ]
+  }
   dbDisconnect(mygdb)
   
   matched = dplyr::inner_join(var2junc, spliceai, by = c("VAR_id"))
@@ -92,7 +93,7 @@ function(gdb_path, cohort_name, var2junc, min_spliceai_score, spliceai_table_nam
   }
   matched$VAR_id = as.character(matched$VAR_id)
   matched$idx = paste(matched$VAR_id, matched$Coordinates_of_unannotated_junc, matched$Gene_id, sep=":")
-
+  
   ### Redefine splice start site and end site at forward strand
   forward_strand = matched$strand == "+"
   if (sum(forward_strand) > 0){

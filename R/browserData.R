@@ -5,7 +5,7 @@
 #' @param paired_data logical "TRUE" for paired data mode or "FALSE" for unpaired data mode. If TRUE, arguments tissues_leafcutter_pvals_file, junc_count_files, rna_meta, and wgs_meta are required. The function matches the paired samples by 'SubjectID' in the metadata.   
 #' @param junc_anno_files vector A list of output files of annotateJunc function, which contain junction annotations.
 #' @param cs_qtl_files string The output file of collapsedsQTL function. One row in the the data.frame is an annotated DNA variant that mapped to a novel junction in a subject's tissues. 
-#' @param tissues_leafcutter_pvals_file list The file paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under the tissue type. The tissues should be the same with those in the RNAseq sample metadata file.
+#' @param tissues_leafcutter_pvals_file list The file paths to the LeafCutterMD analysis P values of each tissue type. Each element is a LeafCutterMD file path named under the tissue type. It should also contain an "colnamesToSampleID" element, which is a vector of RNAseq SampleIDs named by the matching column names in the LeafCutterMD files. The tissues should be the same with those in the RNAseq sample metadata file.
 #' @param junc_count_files vector A list of output files of mergeJuncData funciton, which contain junction-sample read count table. The input file name list in the first four arguments should be matched.
 #' @param output_dir string The path to data output directory.
 #' 
@@ -22,11 +22,19 @@ browserData<-
     
     if (paired_data){
       leafcutter_pvals_merged = NULL
-      for (tissue in names(tissues_leafcutter_pvals_file)){
+      tissues_leafcutter_ = names(tissues_leafcutter_pvals_file)
+      tissues_leafcutter_ = tissues_leafcutter_[tissues_leafcutter_ != "colnamesToSampleID"]
+      
+      for (tissue in tissues_leafcutter_){
         
         leafcutter_pvals_file = tissues_leafcutter_pvals_file[[tissue]]
         leafcutter_pvals = read.table(leafcutter_pvals_file, header = T, sep="\t", row.names = 1, stringsAsFactors = F, check.names=F)
-        colnames(leafcutter_pvals) = do.call(rbind, strsplit(colnames(leafcutter_pvals), split = ".Aligned"))[, 1]
+        if ( sum(!colnames(leafcutter_pvals) %in% names(tissues_leafcutter_pvals_file$colnamesToSampleID)) == 0 ){
+          colnames(leafcutter_pvals) = tissues_leafcutter_pvals_file$colnamesToSampleID[colnames(leafcutter_pvals)]
+        }else{
+          stop("Error: LeafCutterMD colnames not found in 'tissues_leafcutter_pvals_file$colnamesToSampleID'")
+        }
+        # colnames(leafcutter_pvals) = do.call(rbind, strsplit(colnames(leafcutter_pvals), split = ".Aligned"))[, 1]
         rename_row = do.call(rbind, strsplit(rownames(leafcutter_pvals), "\\:|\\_"))[, c(1:3,6)]
         colnames(rename_row) = c("chr", "start", "end", "strand")
         rename_row[, "end"] = as.integer(rename_row[, "end"]) - 1
@@ -68,11 +76,11 @@ browserData<-
         
         if (paired_data){
           gz_file = gzfile( paste(output_dir, sprintf("%s_%s_intron_count.txt.gz", gene_id, gene_name), sep=.Platform$file.sep), "w")
-          write.table(cbind(junc_anno_gene[, c("Junc", "gene.id", "gene.name", "event")], junc_count[junc_anno_gene$Junc, ]), gz_file, row.names = F, col.names=T, sep='\t', quote=F)
+          write.table(cbind(junc_anno_gene[, c("pos", "gene.id", "gene.name", "event")], junc_count[junc_anno_gene$pos, ]), gz_file, row.names = F, col.names=T, sep='\t', quote=F)
           close(gz_file)
         
           gz_file = gzfile( paste(output_dir, sprintf("%s_%s_leafcutter_pval.txt.gz", gene_id, gene_name), sep=.Platform$file.sep), "w")
-          write.table(leafcutter_pvals_merged[(rownames(leafcutter_pvals_merged) %in% junc_anno_gene$Junc), ], gz_file, row.names = T, col.names=T, sep='\t', quote=F)
+          write.table(leafcutter_pvals_merged[(rownames(leafcutter_pvals_merged) %in% junc_anno_gene$pos), ], gz_file, row.names = T, col.names=T, sep='\t', quote=F)
           close(gz_file)
         }
         

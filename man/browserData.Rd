@@ -20,7 +20,7 @@ browserData(
 
 \item{cs_qtl_files}{string The output file of collapsedsQTL function. One row in the the data.frame is an annotated DNA variant that mapped to a novel junction in a subject's tissues.}
 
-\item{tissues_leafcutter_pvals_file}{list The file paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under the tissue type. The tissues should be the same with those in the RNAseq sample metadata file.}
+\item{tissues_leafcutter_pvals_file}{list The file paths to the LeafCutterMD analysis P values of each tissue type. Each element is a LeafCutterMD file path named under the tissue type. It should also contain an "colnamesToSampleID" element, which is a vector of RNAseq SampleIDs named by the matching column names in the LeafCutterMD files. The tissues should be the same with those in the RNAseq sample metadata file.}
 
 \item{junc_count_files}{vector A list of output files of mergeJuncData funciton, which contain junction-sample read count table. The input file name list in the first four arguments should be matched.}
 

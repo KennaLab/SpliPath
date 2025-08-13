@@ -21,11 +21,11 @@ annotateLeafCutterJunc(
 
 \item{chrom}{string The junctions in this chromosome will be merged among samples.}
 
-\item{tissues_leafcutter_pvals_file}{list The file paths to the LeafCutter analysis P values of each tissue type. Each element is a LeafCutter file path named under the tissue type. The tissues should be the same with those in the RNAseq sample metadata file.}
+\item{tissues_leafcutter_pvals_file}{list The file paths to the LeafCutterMD analysis P values of each tissue type. Each element is a LeafCutterMD file path named under the tissue type. It should also contain an "colnamesToSampleID" element, which is a vector of RNAseq SampleIDs named by the matching column names in the LeafCutterMD files. The tissues should be the same with those in the RNAseq sample metadata file.}
 
-\item{max_LeafCutter_Pval}{numeric The threshold of LeafCutter P value of a novel junction.}
+\item{max_LeafCutter_Pval}{numeric The threshold of LeafCutterMD P value of a novel junction.}
 
-\item{min_nr_tissue}{numeric Require novel junction LeafCutter P value under the provided threshold in at least min_nr_tissue tissues.}
+\item{min_nr_tissue}{numeric Require novel junction LeafCutterMD P value under the provided threshold in at least min_nr_tissue tissues.}
 
 \item{output_prefix}{string Prefix of output files.}
 

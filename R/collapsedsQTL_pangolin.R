@@ -78,11 +78,6 @@ collapsedsQTL_pangolin <-
     vars = vars[, c("CHROM", "POS", names(pangolin_prediction), "VAR_id", "DNA_variant")]
     vars = vars[order(vars$CHROM, as.integer(vars$POS)), ]
     
-    ### Filter vars by QC and gnomAD AF
-    vars_filter = rvat::getAnno(mygdb, "var", VAR_id = vars$VAR_id, where = "VAR_id IN (select VAR_id from QC where VQSR = 'PASS') AND VAR_id IN (select VAR_id from gnomAD_non_neuro_AF where rare_genotype_freq001 is not '' )")
-    vars = vars[vars$VAR_id %in% vars_filter$VAR_id, ]
-    rm(vars_filter)
-    
     # Get variants AF
     geno = rvat::getGT(mygdb, VAR_id=unique(vars$VAR_id), cohort=cohort_name)
     AF = rvat::getAF(geno)

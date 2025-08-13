@@ -47,10 +47,12 @@ for t in ${tissues[@]}; do
 done
 ```
 
-### 3. Predict splice altering effect of DNA variants using SpliceAI and dbscSNV.
+### 3. Predict splice altering effect of DNA variants using SpliceAI and Pangolin.
 
-There are pre-computed SpliceAI scores (https://github.com/Illumina/SpliceAI), and pre-computed dbscSNV scores (http://www.liulab.science/dbscsnv.html) in VCF format. Or, users can run SpliceAI with customized parameters.
-The VCF files contain splice-altering predictions or any other annotations should be first transformed to a table (e.g. by function [```rvat::vcfInfo2Table```](https://kennalab.github.io/rvat/reference/vcfInfo2Table.html)), where the rows are the variants and columns are CHROM, POS, ID, REF, ALT, and any other annotations (For SpliceAI, the columns are "spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL", "spliceaiDP_AG", "spliceaiDP_AL", "spliceaiDP_DG", "spliceaiDP_DL", and etc. For dbscSNV, the columns are "ada_score", "rf_score", and etc.). 
+#### SpliceAI
+
+There are pre-computed SpliceAI scores (https://github.com/Illumina/SpliceAI) in VCF format. Or, users can run SpliceAI with customized parameters.
+The VCF files contain splice-altering predictions or any other annotations should be first converted to a table (e.g. by function [```rvat::vcfInfo2Table```](https://kennalab.github.io/rvat/reference/vcfInfo2Table.html)), where the rows are the variants and columns are CHROM, POS, ID, REF, ALT, and any other annotations (For SpliceAI, the columns are "spliceaiDS_AG", "spliceaiDS_AL", "spliceaiDS_DG", "spliceaiDS_DL", "spliceaiDP_AG", "spliceaiDP_AL", "spliceaiDP_DG", "spliceaiDP_DL", and etc.). 
 For example,
 ```{r}
 ### R session
@@ -70,6 +72,30 @@ spliceai \
 -D 500 \
 -R Homo_sapiens.GRCh38.dna.primary_assembly.fa \
 -A Ensembl_GRCh38.98.basic.transcript.txt
+```
+
+In the output VCF, there might be multiple predictions for one variant in a line. The following code can be applied to convert the SpliceAI output VCF to table
+NB: This code assumes the ID column in the VCF is VAR_id from genome GDB
+```{sh}
+(echo -e "VAR_id\tCHROM\tPOS\tREF\tALT\tspliceaiSYMBOL\tspliceaiDS_AG\tspliceaiDS_AL\tspliceaiDS_DG\tspliceaiDS_DL\tspliceaiDP_AG\tspliceaiDP_AL\tspliceaiDP_DG\tspliceaiDP_DL";
+cat example_rvatData_SpliceAI_prediction.vcf | grep -v '^#' | grep -v ',' | awk '$8!="."' | awk -F'[|\t]' '{print $3, $1, $2, $4, $5, $9, $10, $11, $12, $13, $14, $15, $16, $17}' OFS='\t' | awk '$10!="."' ;
+cat example_rvatData_SpliceAI_prediction.vcf | grep -v '^#' | grep ',' | awk -F'[,\t]' '{print $3, $1, $2, $4, $5, $8} {for (i = 9; i <= 100; i++) print $3, $1, $2, $4, $5, "SpliceAI="$i }' OFS="\t" | awk '$6!="SpliceAI="' | awk -F'[|\t]' '{print $1, $2, $3, $4, $5, $7, $8, $9, $10, $11, $12, $13, $14, $15}' OFS='\t' | awk '$10!="."' 
+) > example_rvatData_SpliceAI_prediction.txt
+```
+
+#### Pangolin
+
+Run Pangolin:
+```{sh}
+pangolin -m False -d 5000 example_rvatData.vcf hs38DH.fa gencode.v32.chr_patch_hapl_scaff.basic.annotation.db example_rvatData_pangolin_prediction
+```
+See https://github.com/tkzeng/Pangolin for input genome annotation files.
+
+Convert output VCF to table
+NB: This code assumes the ID column in the VCF is VAR_id from genome GDB
+```{sh}
+(echo -e "VAR_id\tCHROM\tPOS\tREF\tALT\tgene_id\tpos_increase\tscore_increase\tpos_decrease\tscore_decrease"
+grep -v '^#' example_rvatData_pangolin_prediction.vcf | awk '$8!="."' | awk -F'[|:=\t]' '{print $3, $1, $2, $4, $5, $9, $10, $11, $12, $13}' OFS='\t' ) > example_rvatData_pangolin_prediction.txt
 ```
 
 ### 4. Extract annotated introns from genome annotation file.

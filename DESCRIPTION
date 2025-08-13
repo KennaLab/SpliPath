@@ -2,13 +2,11 @@ Package: SpliPath
 Type: Package
 Title: Splicing Pathology
 Version: 0.1.1
-Date: 2024-10-09
+Data: 2025-07
 Author: c(person(given='Yan',family='Wang',email='Y.Wang-3@umcutrecht.nl',role = c("aut", "cre")), person(given='Kevin',family='Kenna',email='K.P.Kenna@umcutrecht.nl',role = c("aut")))
 Description: SpliPath is designed to identify and functionally cluster splice-altering variants in WGS that have similar effects on RNA splicing. We refer to these variants as collapsed splicing quantitative trait loci (csQTLs). SpliPath aims to address two main difficulties in explaining missing heritability in rare disorders: effective method to functionally interpret genetic variants and increase statistical power to establish associations between rare variants and phenotypes. First, SpliPath links the prediction of SpliceAI with reference transcriptomics data to identify genetic variants that induce splice changes actually occuring in disease-relevant transcriptomics profiles. Second, SpliPath aggregates variants with similar functional consequences into csQTLs for more powerful genetic association analyses.
 Encoding: UTF-8
-License: What license is it under?
-Remotes:
-biocViews:
-Imports: tidyr, dplyr, rtracklayer, rvat, RSQLite, DBI, shiny, ggplot2, stringr, foreach
+License: Apache-2.0 license
+Imports: tidyr, dplyr, rtracklayer, rvat, RSQLite, DBI, shiny, ggplot2, stringr, foreach, reshape2
 Depends: R (>= 3.6.1)
 RoxygenNote: 7.3.2

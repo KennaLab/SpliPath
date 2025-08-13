@@ -62,7 +62,7 @@ matchPredNObs_pangolin <-
     
     ### Convert scores when REF is the minor allele
     GT = rvat::getGT(mygdb, VAR_id = pangolin$VAR_id, cohort=cohort_name)
-    pangolin$AF = rowData(GT)[as.character(pangolin$VAR_id), "AF"]
+    pangolin$AF = getAF(GT)[as.character(pangolin$VAR_id)]
     rm(GT)
     pangolin[pangolin$AF > 0.5, pangolin_pred ] = pangolin[pangolin$AF > 0.5, c("pos_decrease", "score_decrease", "pos_increase", "score_increase") ]
     
@@ -140,7 +140,7 @@ matchPredNObs_pangolin <-
     idx = as.numeric(overlap_exon$subjectHits)
     overlap_exon = cbind(ref_exon[as.numeric(overlap_exon$queryHits), ], matched[as.numeric(overlap_exon$subjectHits), ])
     overlap_exon$idx = idx; rm(idx)
-    overlap_exon = overlap_exon[overlap_exon$exon_gene.id == overlap_exon$gene.id, ]
+    overlap_exon = overlap_exon[overlap_exon$exon_gene.id == overlap_exon$Gene_id, ]
     nr_exon_start = overlap_exon %>% dplyr::distinct(idx, exon_start) %>% dplyr::count(idx)
     nr_exon_end = overlap_exon %>% dplyr::distinct(idx, exon_end) %>% dplyr::count(idx)
     overlap_exon = dplyr::full_join(nr_exon_start, nr_exon_end, by="idx")

@@ -47,7 +47,7 @@ collapsedsQTL <-
                                         output_prefix = output_prefix, reference = reference)
     junc_var_region$Coordinates_of_unannotated_junc = paste(junc_var_region$chr, junc_var_region$start, junc_var_region$end, junc_var_region$strand, sep=":")
     junc_var_region = junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")]
-    junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")] = sapply(junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")] , FUN=as.vector)
+    junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")] = lapply(junc_var_region[, c("chr", "region.start", "region.end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")] , FUN=as.vector)
     colnames(junc_var_region)[2:3] = c("start", "end")
     junc_var_region = junc_var_region[order(junc_var_region$chr, junc_var_region$start), ]
     
@@ -87,9 +87,10 @@ collapsedsQTL <-
     rm(geno, AF)
     
     ### Map variant to aberrant splicing region
-    vars_gr = GenomicRanges::makeGRangesFromDataFrame(vars, start.field = "POS", end.field = "POS", keep.extra.columns = T )
+    vars_gr = GenomicRanges::makeGRangesFromDataFrame(vars, seqnames.field="CHROM", start.field = "POS", end.field = "POS", keep.extra.columns = T )
     junc_var_region_gr = GenomicRanges::makeGRangesFromDataFrame(junc_var_region, starts.in.df.are.0based = T, keep.extra.columns = T )
     overlaps = GenomicRanges::findOverlaps(vars_gr, junc_var_region_gr)
+    junc_var_region_gr = rmBlackListRegion(junc_var_region_gr, blacklist)
     if (length(overlaps) == 0){stop("No variant was mapped to novel junctions")}
     
     vars_gr = as.data.frame(vars_gr[data.frame(overlaps)$queryHits], stringsAsFactors = F, row.names = NULL)
@@ -98,7 +99,6 @@ collapsedsQTL <-
     
     junc_var_region_gr = as.data.frame(junc_var_region_gr[data.frame(overlaps)$subjectHits], stringsAsFactors = F, row.names = NULL)
     junc_var_region_gr = junc_var_region_gr[, c("seqnames", "start", "end", "strand", "junc", "Coordinates_of_unannotated_junc", "event", "gene.name", "gene.id")]
-    junc_var_region_gr = rmBlackListRegion(junc_var_region_gr, blacklist)
     colnames(junc_var_region_gr) = c("region.chr", "region.start", "region.end", "region.strand", "junc", "Coordinates_of_unannotated_junc", "Event", "Gene", "Gene_id")
     var2junc = cbind(vars_gr, junc_var_region_gr)
     var2junc$VAR_id = as.character(var2junc$VAR_id)
@@ -107,16 +107,16 @@ collapsedsQTL <-
     rm(junc_var_region, vars)
     
     # Match observed junction with SpliceAI prediction
-    print("Matching variants with junctions ...")
+    message("Matching variants with junctions ...")
     spliceai_pred_match = matchPredNObs(gdb_path = gdb_path, 
                                         cohort_name = cohort_name,
-                                        var2junc, #tissue_map, 
+                                        var2junc, 
                                         min_spliceai_score = min_spliceai_score, 
                                         spliceai_table_name = names(spliceai_prediction),
                                         max_skip_exon = max_skip_exon,
                                         reference = reference,
                                         spliceai_default_reference = spliceai_default_reference)
-
+    message("Finish matching")
     var2junc = dplyr::left_join(var2junc, 
                                 spliceai_pred_match[, !colnames(spliceai_pred_match) %in% 
                                                                 c("chr", "start", "end", "strand", "start.pos", "end.pos", "MaxDS", "AF", "spliceaiSG_idx", "spliceaiEG_idx", "spliceaiSL_idx", "spliceaiEL_idx")],

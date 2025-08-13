@@ -193,13 +193,13 @@ server = function(input, output, session) {
                column(12,
                       selectInput(inputId = "color_by", 
                            label = "Color by", 
-                           choices = setdiff(colnames(upload_file$rna_meta), c("SampleID", "SubjectID"))[1])),
+                           choices = base::setdiff(colnames(upload_file$rna_meta), c("SampleID", "SubjectID"))[1])),
                column(12, h5("Filter samples by other info:")),
                column( 8,
                        selectInput(
                          "addvariables_select_tab1_main",
                          label = NULL,
-                         choices = setdiff(colnames(upload_file$rna_meta), c("SampleID", "SubjectID")),
+                         choices = base::setdiff(colnames(upload_file$rna_meta), c("SampleID", "SubjectID")),
                        )
                ),
                column( 4, actionButton("addvariables_add_tab1_main", label = "Add") ## adds it to filtertab1_m,ain 
@@ -220,7 +220,7 @@ server = function(input, output, session) {
                  filters_tab1_main[["add_filters"]] = c(filters_tab1_main[["add_filters"]], input[["addvariables_select_tab1_main"]]) 
                  updateSelectInput(session,
                                    inputId = "addvariables_select_tab1_main",
-                                   choices = setdiff(colnames(upload_file$rna_meta), c("SampleID", "SubjectID")))
+                                   choices = base::setdiff(colnames(upload_file$rna_meta), c("SampleID", "SubjectID")))
                })
   
   output$addvariables_ui_tab1_main = renderUI({
@@ -290,7 +290,7 @@ server = function(input, output, session) {
                       sashimi2gg = data.frame())
   
   ### Default Show
-  cryptic_intron = plot_number_cryptic_intron(upload_file$gene_splice, upload_file$rna_meta, setdiff(colnames(upload_file$rna_meta), c("SampleID", "SubjectID"))[1], "All_Tissues", other_filters=list()) 
+  cryptic_intron = plot_number_cryptic_intron(upload_file$gene_splice, upload_file$rna_meta, base::setdiff(colnames(upload_file$rna_meta), c("SampleID", "SubjectID"))[1], "All_Tissues", other_filters=list()) 
   rv$summary = cryptic_intron$summary_plot
   rv$meta_table = cryptic_intron$meta_table
   
@@ -333,7 +333,7 @@ server = function(input, output, session) {
     
     rv$input_overview_genes = c()
     if (! "" %in% input$overview_genes){
-      rv$input_overview_genes = c(rv$input_overview_genes, setdiff(unlist(strsplit(input$overview_genes, split="\n")), ""))
+      rv$input_overview_genes = c(rv$input_overview_genes, base::setdiff(unlist(strsplit(input$overview_genes, split="\n")), ""))
     }
     if (!is.null(input$overview_geneset)){
       rv$input_overview_genes = c(rv$input_overview_genes, readLines(input$overview_geneset$datapath))
@@ -341,7 +341,7 @@ server = function(input, output, session) {
 
     rv$input_overview_subjects = input$overview_subject
     if (! "" %in% input$overview_subject ){
-      rv$input_overview_subjects = setdiff(unlist(strsplit(input$overview_subject, split="\n")), "")
+      rv$input_overview_subjects = base::setdiff(unlist(strsplit(input$overview_subject, split="\n")), "")
     }
     
     gene_overview = gene_tissue_nr_junc_venn(toupper(rv$input_overview_genes), upload_file$tissues, rv$input_overview_subjects, dir_path = upload_file$browser_data_dir, gene_table = upload_file$gene_table, rna_meta = upload_file$rna_meta, "Group", 
